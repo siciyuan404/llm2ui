@@ -1,0 +1,62 @@
+/**
+ * TypeScript Configuration for Type Declaration Generation
+ * 
+ * This configuration is used specifically for generating .d.ts files
+ * for the @llm2ui/renderer NPM package.
+ * 
+ * @see Requirements 13.4
+ */
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true,
+
+    /* Declaration Generation */
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+
+    /* Paths - resolve imports from main project */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"],
+      "../../src/*": ["../../src/*"],
+      "../../../src/*": ["../../src/*"],
+      "../../../../src/*": ["../../src/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "../../src/sdk/**/*.ts",
+    "../../src/sdk/**/*.tsx",
+    "../../src/lib/**/*.ts",
+    "../../src/lib/**/*.tsx",
+    "../../src/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx"
+  ]
+}
