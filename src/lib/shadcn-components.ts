@@ -33,6 +33,7 @@ import {
   TableCaption,
 } from '../components/ui/table';
 import { Label } from '../components/ui/label';
+import { Textarea } from '../components/ui/textarea';
 
 /**
  * Common prop schemas used across multiple components
@@ -259,6 +260,42 @@ export function registerShadcnComponents(registry: ComponentRegistry = defaultRe
     },
   });
 
+  // Textarea component
+  registry.register({
+    name: 'Textarea',
+    component: Textarea,
+    category: 'input',
+    description: 'A multi-line text input component',
+    propsSchema: {
+      ...commonProps,
+      placeholder: {
+        type: 'string',
+        required: false,
+        description: 'Placeholder text',
+      },
+      value: {
+        type: 'string',
+        required: false,
+        description: 'Textarea value',
+      },
+      disabled: {
+        type: 'boolean',
+        required: false,
+        description: 'Whether the textarea is disabled',
+      },
+      rows: {
+        type: 'number',
+        required: false,
+        description: 'Number of visible text lines',
+      },
+      onChange: {
+        type: 'function',
+        required: false,
+        description: 'Change event handler',
+      },
+    },
+  });
+
   // Text component (simple span wrapper)
   registry.register({
     name: 'Text',
@@ -303,6 +340,7 @@ export function registerShadcnComponents(registry: ComponentRegistry = defaultRe
     { name: 'tableCell', component: TableCell, category: 'display' },
     { name: 'tableCaption', component: TableCaption, category: 'display' },
     { name: 'label', component: Label, category: 'input' },
+    { name: 'textarea', component: Textarea, category: 'input' },
   ] as const;
 
   for (const alias of lowercaseAliases) {

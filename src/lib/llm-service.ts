@@ -3,9 +3,17 @@
  * 
  * Provides configuration management, streaming response handling,
  * and JSON extraction for LLM interactions.
+ * Supports example-driven generation for enhanced UI generation quality.
+ * 
+ * @module llm-service
+ * @see Requirements 7.4
+ * @see Requirements 6.1, 6.2, 6.3, 6.4, 6.5 (案例驱动生成)
  */
 
 import type { UISchema } from '../types';
+import { fixUISchema, type FixResult } from './schema-fixer';
+import { generateSystemPrompt, type PromptGeneratorOptions } from './prompt-generator';
+import type { RetrievalOptions } from './example-retriever';
 
 /**
  * Supported LLM providers
@@ -35,6 +43,10 @@ export interface LLMConfig {
   timeout?: number;
   /** Custom headers for API requests */
   headers?: Record<string, string>;
+  /** 是否启用案例增强，默认 true */
+  enableExampleEnhancement?: boolean;
+  /** 案例检索选项 */
+  exampleRetrievalOptions?: RetrievalOptions;
 }
 
 /**
@@ -372,15 +384,151 @@ function extractAnthropicContent(data: string): string {
 }
 
 /**
+ * 系统提示词缓存
+ * 
+ * 缓存生成的系统提示词，避免重复生成
+ * 缓存键基于用户输入和检索选项
+ * 
+ * @see Requirements 6.5
+ */
+interface SystemPromptCache {
+  /** 缓存的提示词 */
+  prompt: string;
+  /** 用户输入（用于缓存键） */
+  userInput: string | undefined;
+  /** 检索选项（用于缓存键） */
+  retrievalOptions: RetrievalOptions | undefined;
+  /** 缓存时间戳 */
+  timestamp: number;
+}
+
+/** 系统提示词缓存实例 */
+let systemPromptCache: SystemPromptCache | null = null;
+
+/** 缓存有效期（毫秒），默认 5 分钟 */
+const CACHE_TTL = 5 * 60 * 1000;
+
+/**
+ * 生成缓存键
+ * @param userInput - 用户输入
+ * @param retrievalOptions - 检索选项
+ * @returns 缓存键字符串
+ */
+function generateCacheKey(
+  userInput: string | undefined,
+  retrievalOptions: RetrievalOptions | undefined
+): string {
+  return JSON.stringify({ userInput, retrievalOptions });
+}
+
+/**
+ * 检查缓存是否有效
+ * @param cache - 缓存对象
+ * @param userInput - 当前用户输入
+ * @param retrievalOptions - 当前检索选项
+ * @returns 缓存是否有效
+ */
+function isCacheValid(
+  cache: SystemPromptCache | null,
+  userInput: string | undefined,
+  retrievalOptions: RetrievalOptions | undefined
+): boolean {
+  if (!cache) return false;
+  
+  // 检查缓存是否过期
+  if (Date.now() - cache.timestamp > CACHE_TTL) {
+    return false;
+  }
+  
+  // 检查缓存键是否匹配
+  const currentKey = generateCacheKey(userInput, retrievalOptions);
+  const cachedKey = generateCacheKey(cache.userInput, cache.retrievalOptions);
+  
+  return currentKey === cachedKey;
+}
+
+/**
+ * 获取或生成案例增强的系统提示词
+ * 
+ * 如果缓存有效，返回缓存的提示词；否则生成新的提示词并缓存
+ * 
+ * @param userInput - 用户输入文本
+ * @param retrievalOptions - 检索选项
+ * @param language - 输出语言
+ * @returns 生成的系统提示词
+ * 
+ * @see Requirements 6.2, 6.4, 6.5
+ */
+export function getEnhancedSystemPrompt(
+  userInput: string | undefined,
+  retrievalOptions?: RetrievalOptions,
+  language: 'zh' | 'en' = 'zh'
+): string {
+  // 检查缓存是否有效
+  if (isCacheValid(systemPromptCache, userInput, retrievalOptions)) {
+    return systemPromptCache!.prompt;
+  }
+  
+  // 生成新的系统提示词
+  const options: PromptGeneratorOptions = {
+    includeRelevantExamples: true,
+    userInput,
+    retrievalOptions,
+    language,
+  };
+  
+  const prompt = generateSystemPrompt(options);
+  
+  // 更新缓存
+  systemPromptCache = {
+    prompt,
+    userInput,
+    retrievalOptions,
+    timestamp: Date.now(),
+  };
+  
+  return prompt;
+}
+
+/**
+ * 清除系统提示词缓存
+ * 
+ * 当组件目录或案例库发生变化时调用
+ */
+export function clearSystemPromptCache(): void {
+  systemPromptCache = null;
+}
+
+/**
+ * 从消息数组中提取用户输入
+ * 
+ * 获取最后一条用户消息的内容，用于案例检索
+ * 
+ * @param messages - 消息数组
+ * @returns 用户输入文本，如果没有用户消息则返回 undefined
+ */
+function extractUserInput(messages: ChatMessage[]): string | undefined {
+  // 从后往前查找最后一条用户消息
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'user') {
+      return messages[i].content;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Sends a message to the LLM and returns an async iterator for streaming response
  * 
  * Automatically injects system prompt if configured in the LLM config.
+ * When enableExampleEnhancement is true (default), generates an enhanced system prompt
+ * with relevant examples based on user input.
  * 
  * @param messages - Array of chat messages
  * @param config - LLM configuration
  * @yields StreamChunk - Streaming chunks of the response
  * 
- * @see Requirements 6.3
+ * @see Requirements 6.1, 6.2, 6.3, 6.4, 6.5
  */
 export async function* sendMessage(
   messages: ChatMessage[],
@@ -394,8 +542,26 @@ export async function* sendMessage(
     return;
   }
 
+  // 处理案例增强
+  let configWithEnhancedPrompt = fullConfig;
+  const enableExampleEnhancement = fullConfig.enableExampleEnhancement !== false; // 默认启用
+  
+  if (enableExampleEnhancement && !fullConfig.systemPrompt) {
+    // 如果启用案例增强且没有自定义系统提示词，生成增强的系统提示词
+    const userInput = extractUserInput(messages);
+    const enhancedPrompt = getEnhancedSystemPrompt(
+      userInput,
+      fullConfig.exampleRetrievalOptions,
+      'zh' // 默认使用中文
+    );
+    configWithEnhancedPrompt = {
+      ...fullConfig,
+      systemPrompt: enhancedPrompt,
+    };
+  }
+
   // Inject system prompt if configured
-  const messagesWithPrompt = injectSystemPrompt(messages, fullConfig);
+  const messagesWithPrompt = injectSystemPrompt(messages, configWithEnhancedPrompt);
 
   const endpoint = fullConfig.endpoint!;
   const headers = buildHeaders(fullConfig);
@@ -795,15 +961,41 @@ export function extractAllJSON(text: string): unknown[] {
 }
 
 /**
+ * Options for extracting UISchema
+ */
+export interface ExtractUISchemaOptions {
+  /** Whether to automatically fix common schema errors (default: false) */
+  autoFix?: boolean;
+}
+
+/**
+ * Result of UISchema extraction
+ */
+export interface ExtractUISchemaResult {
+  /** Extracted UISchema (null if extraction failed) */
+  schema: UISchema | null;
+  /** Fix result if autoFix was enabled */
+  fixResult?: FixResult;
+}
+
+/**
  * Extracts UISchema from LLM response text
  * 
  * @param text - LLM response text
- * @returns UISchema if found and valid, null otherwise
+ * @param options - Extraction options
+ * @returns UISchema if found and valid, null otherwise. If autoFix is enabled, returns ExtractUISchemaResult.
+ * 
+ * @see Requirements 7.4
  */
-export function extractUISchema(text: string): UISchema | null {
+export function extractUISchema(text: string, options?: ExtractUISchemaOptions): UISchema | null;
+export function extractUISchema(text: string, options: ExtractUISchemaOptions & { autoFix: true }): ExtractUISchemaResult;
+export function extractUISchema(text: string, options?: ExtractUISchemaOptions): UISchema | null | ExtractUISchemaResult {
   const result = extractJSON(text);
 
   if (!result.success || !result.parsed) {
+    if (options?.autoFix) {
+      return { schema: null };
+    }
     return null;
   }
 
@@ -823,8 +1015,27 @@ export function extractUISchema(text: string): UISchema | null {
       if (!('version' in parsed)) {
         parsed.version = '1.0';
       }
+      
+      // If autoFix is enabled, try to fix the schema
+      if (options?.autoFix) {
+        const fixResult = fixUISchema(parsed);
+        return {
+          schema: fixResult.fixed ? fixResult.schema! : (parsed as unknown as UISchema),
+          fixResult,
+        };
+      }
+      
       return parsed as unknown as UISchema;
     }
+  }
+
+  // If autoFix is enabled, try to fix even if basic structure is incomplete
+  if (options?.autoFix) {
+    const fixResult = fixUISchema(parsed);
+    return {
+      schema: fixResult.fixed ? fixResult.schema! : null,
+      fixResult,
+    };
   }
 
   return null;

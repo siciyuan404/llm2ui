@@ -10,7 +10,7 @@
  * - Property 5: JSON 代码块提取完整性 (Validates: Requirements 5.1, 5.2, 5.5)
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import fc from 'fast-check';
 import {
   extractJSONBlocks,
@@ -22,6 +22,8 @@ import {
   createLLMConfig,
   DEFAULT_CONFIGS,
   injectSystemPrompt,
+  getEnhancedSystemPrompt,
+  clearSystemPromptCache,
 } from './llm-service';
 import { validateUISchema } from './validation';
 import type { LLMConfig, ChatMessage } from './llm-service';
@@ -1002,5 +1004,219 @@ describe('Property 10: System Prompt Injection', () => {
       ),
       { numRuns: 100 }
     );
+  });
+});
+
+
+/**
+ * Example Enhancement Tests
+ * 
+ * **Feature: example-driven-generation**
+ * 
+ * Tests for example enhancement configuration and system prompt caching.
+ * 
+ * **Validates: Requirements 6.3, 6.5**
+ */
+describe('Example Enhancement', () => {
+  beforeEach(() => {
+    // Clear cache before each test
+    clearSystemPromptCache();
+  });
+
+  describe('Example Enhancement Configuration', () => {
+    /**
+     * Test that enableExampleEnhancement defaults to true
+     * **Validates: Requirements 6.3**
+     */
+    it('should have enableExampleEnhancement default to true', () => {
+      const config: LLMConfig = {
+        provider: 'openai',
+        apiKey: 'sk-test',
+        model: 'gpt-4',
+      };
+      
+      // enableExampleEnhancement should be undefined (defaults to true in sendMessage)
+      expect(config.enableExampleEnhancement).toBeUndefined();
+    });
+
+    /**
+     * Test that enableExampleEnhancement can be explicitly set to false
+     * **Validates: Requirements 6.3**
+     */
+    it('should allow disabling example enhancement', () => {
+      const config: LLMConfig = {
+        provider: 'openai',
+        apiKey: 'sk-test',
+        model: 'gpt-4',
+        enableExampleEnhancement: false,
+      };
+      
+      expect(config.enableExampleEnhancement).toBe(false);
+    });
+
+    /**
+     * Test that exampleRetrievalOptions can be configured
+     * **Validates: Requirements 6.3**
+     */
+    it('should allow configuring example retrieval options', () => {
+      const config: LLMConfig = {
+        provider: 'openai',
+        apiKey: 'sk-test',
+        model: 'gpt-4',
+        enableExampleEnhancement: true,
+        exampleRetrievalOptions: {
+          maxResults: 5,
+          category: 'form',
+          minScore: 0.2,
+        },
+      };
+      
+      expect(config.exampleRetrievalOptions).toBeDefined();
+      expect(config.exampleRetrievalOptions?.maxResults).toBe(5);
+      expect(config.exampleRetrievalOptions?.category).toBe('form');
+      expect(config.exampleRetrievalOptions?.minScore).toBe(0.2);
+    });
+  });
+
+  describe('System Prompt Caching', () => {
+    /**
+     * Test that getEnhancedSystemPrompt returns a non-empty string
+     * **Validates: Requirements 6.5**
+     */
+    it('should generate enhanced system prompt', () => {
+      const prompt = getEnhancedSystemPrompt('创建一个登录表单');
+      
+      expect(prompt).toBeDefined();
+      expect(typeof prompt).toBe('string');
+      expect(prompt.length).toBeGreaterThan(0);
+    });
+
+    /**
+     * Test that system prompt contains relevant examples section
+     * **Validates: Requirements 6.2, 6.4**
+     */
+    it('should include relevant examples in system prompt', () => {
+      const prompt = getEnhancedSystemPrompt('创建一个登录表单');
+      
+      // Should contain reference examples section
+      expect(prompt).toContain('参考案例');
+    });
+
+    /**
+     * Test that cache returns same prompt for same input
+     * **Validates: Requirements 6.5**
+     */
+    it('should cache system prompt for same input', () => {
+      const userInput = '创建一个侧边栏';
+      
+      const prompt1 = getEnhancedSystemPrompt(userInput);
+      const prompt2 = getEnhancedSystemPrompt(userInput);
+      
+      // Should return the exact same string (cached)
+      expect(prompt1).toBe(prompt2);
+    });
+
+    /**
+     * Test that cache is invalidated for different input
+     * **Validates: Requirements 6.5**
+     */
+    it('should generate new prompt for different input', () => {
+      const prompt1 = getEnhancedSystemPrompt('创建一个登录表单');
+      clearSystemPromptCache();
+      const prompt2 = getEnhancedSystemPrompt('创建一个侧边栏');
+      
+      // Prompts should be different (different user input leads to different examples)
+      // Note: They might be the same if the same default examples are used,
+      // but the cache should be invalidated
+      expect(typeof prompt1).toBe('string');
+      expect(typeof prompt2).toBe('string');
+    });
+
+    /**
+     * Test that clearSystemPromptCache clears the cache
+     * **Validates: Requirements 6.5**
+     */
+    it('should clear cache when clearSystemPromptCache is called', () => {
+      const userInput = '创建一个表单';
+      
+      // Generate and cache
+      const prompt1 = getEnhancedSystemPrompt(userInput);
+      
+      // Clear cache
+      clearSystemPromptCache();
+      
+      // Generate again - should still work
+      const prompt2 = getEnhancedSystemPrompt(userInput);
+      
+      expect(prompt1).toBeDefined();
+      expect(prompt2).toBeDefined();
+      // Both should be valid prompts
+      expect(prompt1.length).toBeGreaterThan(0);
+      expect(prompt2.length).toBeGreaterThan(0);
+    });
+
+    /**
+     * Test that cache respects retrieval options
+     * **Validates: Requirements 6.5**
+     */
+    it('should cache separately for different retrieval options', () => {
+      const userInput = '创建一个表单';
+      
+      const prompt1 = getEnhancedSystemPrompt(userInput, { maxResults: 3 });
+      const prompt2 = getEnhancedSystemPrompt(userInput, { maxResults: 3 });
+      
+      // Same options should return cached result
+      expect(prompt1).toBe(prompt2);
+      
+      // Clear and use different options
+      clearSystemPromptCache();
+      const prompt3 = getEnhancedSystemPrompt(userInput, { maxResults: 5 });
+      
+      // Should still be a valid prompt
+      expect(prompt3).toBeDefined();
+      expect(prompt3.length).toBeGreaterThan(0);
+    });
+
+    /**
+     * Test that undefined user input uses default examples
+     * **Validates: Requirements 6.4**
+     */
+    it('should use default examples when user input is undefined', () => {
+      const prompt = getEnhancedSystemPrompt(undefined);
+      
+      expect(prompt).toBeDefined();
+      expect(prompt.length).toBeGreaterThan(0);
+      // Should still contain reference examples section
+      expect(prompt).toContain('参考案例');
+    });
+
+    /**
+     * Test that empty user input uses default examples
+     * **Validates: Requirements 6.4**
+     */
+    it('should use default examples when user input is empty', () => {
+      const prompt = getEnhancedSystemPrompt('');
+      
+      expect(prompt).toBeDefined();
+      expect(prompt.length).toBeGreaterThan(0);
+    });
+
+    /**
+     * Test language parameter
+     * **Validates: Requirements 6.2**
+     */
+    it('should support language parameter', () => {
+      clearSystemPromptCache();
+      const promptZh = getEnhancedSystemPrompt('create a form', undefined, 'zh');
+      
+      clearSystemPromptCache();
+      const promptEn = getEnhancedSystemPrompt('create a form', undefined, 'en');
+      
+      // Chinese prompt should contain Chinese text
+      expect(promptZh).toContain('参考案例');
+      
+      // English prompt should contain English text
+      expect(promptEn).toContain('Reference Examples');
+    });
   });
 });

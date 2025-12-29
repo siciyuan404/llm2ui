@@ -5,9 +5,11 @@
  * for managing provider presets and available models.
  * 
  * @module llm-providers
+ * @see Requirements 7.2
  */
 
 import type { LLMProvider, LLMConfig } from './llm-service';
+import { generateSystemPrompt } from './prompt-generator';
 import {
   getAllModels as getAllModelsFromManager,
   type ModelInfo,
@@ -135,144 +137,9 @@ export function createConfigFromPreset(
 /**
  * Default system prompt for UI generation
  * 
- * Guides the LLM to generate A2UI-compatible UI Schema.
+ * Dynamically generated from Component_Catalog using Prompt_Generator.
  * Includes available component types, their properties, and format examples.
  * 
- * @see Requirements 6.1, 6.4, 6.5
+ * @see Requirements 6.1, 6.4, 6.5, 7.2
  */
-export const DEFAULT_SYSTEM_PROMPT = `你是一个 UI 生成助手，专门帮助用户通过自然语言描述生成用户界面。
-
-当用户描述他们想要的 UI 时，你需要生成符合以下格式的 JSON Schema：
-
-\`\`\`json
-{
-  "version": "1.0",
-  "root": {
-    "id": "root",
-    "type": "container",
-    "props": {
-      "direction": "column",
-      "gap": "md"
-    },
-    "children": [...]
-  }
-}
-\`\`\`
-
-## 可用的组件类型及其属性
-
-### 布局组件
-- **container**: 容器布局
-  - props: { direction: "row" | "column", gap: "sm" | "md" | "lg", align: "start" | "center" | "end", justify: "start" | "center" | "end" | "between" }
-- **card**: 卡片容器
-  - props: { title?: string, description?: string, padding?: "sm" | "md" | "lg" }
-
-### 表单组件
-- **input**: 输入框
-  - props: { placeholder?: string, label?: string, type?: "text" | "email" | "password" | "number", disabled?: boolean }
-- **select**: 下拉选择
-  - props: { placeholder?: string, label?: string, options: Array<{ value: string, label: string }>, disabled?: boolean }
-- **checkbox**: 复选框
-  - props: { label?: string, checked?: boolean, disabled?: boolean }
-- **switch**: 开关
-  - props: { label?: string, checked?: boolean, disabled?: boolean }
-- **form**: 表单容器
-  - props: { onSubmit?: string }
-
-### 展示组件
-- **text**: 文本
-  - props: { content: string, variant?: "default" | "muted" | "primary" }
-- **heading**: 标题
-  - props: { content: string, level?: 1 | 2 | 3 | 4 | 5 | 6 }
-- **image**: 图片
-  - props: { src: string, alt?: string, width?: number, height?: number }
-- **badge**: 徽章
-  - props: { content: string, variant?: "default" | "secondary" | "destructive" | "outline" }
-- **alert**: 提示
-  - props: { title?: string, description?: string, variant?: "default" | "destructive" }
-
-### 交互组件
-- **button**: 按钮
-  - props: { label: string, variant?: "default" | "secondary" | "outline" | "ghost" | "destructive", size?: "sm" | "md" | "lg", disabled?: boolean, onClick?: string }
-
-### 数据展示组件
-- **list**: 列表
-  - props: { items: Array<{ id: string, content: string }> }
-- **table**: 表格
-  - props: { columns: Array<{ key: string, header: string }>, data: Array<Record<string, unknown>> }
-
-### 其他组件
-- **separator**: 分隔线
-  - props: { orientation?: "horizontal" | "vertical" }
-
-## 组件通用属性
-
-每个组件都有以下基本属性：
-- **id**: 唯一标识符（必填）
-- **type**: 组件类型（必填）
-- **props**: 组件属性对象
-- **children**: 子组件数组（可选，仅容器类组件支持）
-- **style**: 自定义样式对象（可选）
-- **data**: 数据绑定配置（可选）
-
-## 数据绑定示例
-
-\`\`\`json
-{
-  "id": "greeting",
-  "type": "text",
-  "props": {
-    "content": "Hello, {{user.name}}!"
-  },
-  "data": {
-    "user": {
-      "name": "string"
-    }
-  }
-}
-\`\`\`
-
-## 完整示例
-
-\`\`\`json
-{
-  "version": "1.0",
-  "root": {
-    "id": "login-form",
-    "type": "card",
-    "props": {
-      "title": "用户登录",
-      "description": "请输入您的账号信息"
-    },
-    "children": [
-      {
-        "id": "username-input",
-        "type": "input",
-        "props": {
-          "label": "用户名",
-          "placeholder": "请输入用户名"
-        }
-      },
-      {
-        "id": "password-input",
-        "type": "input",
-        "props": {
-          "label": "密码",
-          "placeholder": "请输入密码",
-          "type": "password"
-        }
-      },
-      {
-        "id": "submit-btn",
-        "type": "button",
-        "props": {
-          "label": "登录",
-          "variant": "default"
-        }
-      }
-    ]
-  }
-}
-\`\`\`
-
-请始终将 UI Schema 放在 \`\`\`json 代码块中。根据用户的描述生成合适的 UI 组件组合。`;
+export const DEFAULT_SYSTEM_PROMPT = generateSystemPrompt();

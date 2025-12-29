@@ -21,11 +21,41 @@ export {
   getRegisteredComponentNames,
 } from './shadcn-components';
 
+// Component Catalog
+export {
+  ComponentCatalog,
+  defaultCatalog,
+  TYPE_ALIAS_MAP,
+} from './component-catalog';
+export type {
+  ComponentMetadata,
+} from './component-catalog';
+
 // Serialization
 export { serialize, deserialize, schemasEqual } from './serialization';
 
 // Validation
 export { validateJSON, validateUISchema } from './validation';
+export {
+  validateUISchemaEnhanced,
+  levenshteinDistance,
+  getSimilarTypes,
+  validateComponentType,
+  validateComponentProps,
+  checkDeprecatedComponent,
+  setDefaultCatalog,
+  getDefaultCatalog,
+} from './validation';
+export type {
+  ValidationSeverity,
+  ValidationErrorCode,
+  EnhancedValidationError,
+  EnhancedValidationResult,
+  ValidationOptions,
+  JSONValidationResult,
+  JSONValidationError,
+  UISchemaValidationResult,
+} from './validation';
 
 // Data Binding
 export {
@@ -302,3 +332,89 @@ export type {
   SyncResult,
   DataBindingSyncOptions,
 } from './schema-sync';
+
+// Schema Fixer
+export {
+  fixUISchema,
+  generateComponentId,
+} from './schema-fixer';
+export type {
+  FixResult,
+  FixOptions,
+} from './schema-fixer';
+
+// Streaming Validator
+export {
+  StreamingValidator,
+  createStreamingValidator,
+} from './streaming-validator';
+export type {
+  StreamingValidatorCatalog,
+  StreamingWarning,
+  StreamingValidationResult,
+} from './streaming-validator';
+
+// Prompt Generator
+export {
+  generateSystemPrompt,
+  generateComponentDocs,
+  generatePositiveExamples,
+  generateNegativeExamples,
+} from './prompt-generator';
+export type {
+  PromptGeneratorOptions,
+} from './prompt-generator';
+
+// Example Tags (Tag System)
+export {
+  STANDARD_TAGS,
+  getStandardCategories,
+  getStandardTags,
+  isStandardCategory,
+  isStandardTag,
+  validateCategory,
+  getCategoryLabel,
+  getCategoryDescription,
+} from './example-tags';
+export type {
+  ExampleCategory,
+  StandardTag,
+  CategoryValidationResult,
+} from './example-tags';
+
+// Preset Examples
+export {
+  PRESET_EXAMPLES,
+} from './preset-examples';
+export type {
+  ExampleMetadata,
+} from './preset-examples';
+
+// Example Library
+export {
+  ExampleLibrary,
+  createExampleLibrary,
+} from './example-library';
+export type {
+  ExampleLibraryOptions,
+} from './example-library';
+
+// Example Retriever
+export {
+  ExampleRetriever,
+  createExampleRetriever,
+} from './example-retriever';
+export type {
+  RetrievalOptions,
+  RetrievalResult,
+  KeywordMapping,
+} from './example-retriever';
+
+// Example Injector
+export {
+  ExampleInjector,
+  createExampleInjector,
+} from './example-injector';
+export type {
+  InjectionOptions,
+} from './example-injector';
