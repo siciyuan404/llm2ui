@@ -14,9 +14,7 @@ import fc from 'fast-check';
 import { render, screen } from '@testing-library/react';
 import type { UISchema, UIComponent, DataContext } from '@/types';
 import { RenderedUICard } from './RenderedUICard';
-import { validateUISchema } from '@/lib/validation';
-import { defaultRegistry } from '@/lib/component-registry';
-import { registerShadcnComponents } from '@/lib/shadcn-components';
+import { validateUISchema, defaultRegistry, registerShadcnComponents } from '@/lib';
 
 // ============================================================================
 // Test Setup

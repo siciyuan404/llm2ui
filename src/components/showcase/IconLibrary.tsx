@@ -13,9 +13,11 @@ import { cn } from '@/lib/utils';
 import {
   defaultIconRegistry,
   initializeDefaultIcons,
-  type IconCategory,
-  type IconDefinition,
-} from '@/lib/icon-registry';
+} from '@/lib';
+import type {
+  IconCategory,
+  IconDefinition,
+} from '@/lib';
 import { SearchInput } from './SearchInput';
 
 // ============================================================================

@@ -23,20 +23,22 @@ import {
   createMessage,
   generateId,
 } from '@/lib/state-management';
-import type { LLMConfig } from '@/lib/llm-service';
-import { sendMessage, extractUISchema, testConnection } from '@/lib/llm-service';
-import type { UISchema, DataContext } from '@/types';
-import { MessageBubble, LoadingIndicator } from './MessageBubble';
-import { ModelSwitcher } from './ModelSwitcher';
-import { LLMSettingsDialog } from '@/components/settings';
-import type { SavedLLMConfig } from '@/lib/llm-config-manager';
+import type { LLMConfig, SavedLLMConfig } from '@/lib';
 import {
+  sendMessage,
+  extractUISchema,
+  testConnection,
   loadAllLLMConfigs,
   loadCurrentLLMConfig,
   saveCurrentLLMConfig,
   saveLLMConfig,
-} from '@/lib/llm-config-manager';
-import { SchemaSyncer, type SyncResult } from '@/lib/schema-sync';
+  SchemaSyncer,
+} from '@/lib';
+import type { SyncResult } from '@/lib';
+import type { UISchema, DataContext } from '@/types';
+import { MessageBubble, LoadingIndicator } from './MessageBubble';
+import { ModelSwitcher } from './ModelSwitcher';
+import { LLMSettingsDialog } from '@/components/settings';
 
 // ============================================================================
 // Types
@@ -238,9 +240,10 @@ export function ChatInterface({
           status: chunk.done ? 'complete' : 'streaming',
         });
 
-        // Try to extract UISchema when done
+        // Try to extract UISchema when done (with autoFix to resolve type aliases)
         if (chunk.done && fullContent) {
-          const schema = extractUISchema(fullContent);
+          const result = extractUISchema(fullContent, { autoFix: true });
+          const schema = result && 'schema' in result ? result.schema : result;
           if (schema) {
             onMessageUpdate?.(assistantMessageId, {
               extractedSchema: schema,

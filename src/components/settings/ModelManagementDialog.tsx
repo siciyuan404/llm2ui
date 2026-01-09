@@ -45,20 +45,17 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { cn } from '@/lib/utils';
-import type { LLMProvider } from '@/lib/llm-service';
-import { PROVIDER_PRESETS } from '@/lib/provider-presets';
+import type { LLMProvider, ModelInfo } from '@/lib';
 import {
+  PROVIDER_PRESETS,
   getAllModels,
   searchModels,
   addModel,
   updateModel,
   deleteModel,
   getCustomModelById,
-  type ModelInfo,
-  type CustomModel,
-  type ModelValidationResult,
   validateModel,
-} from '@/lib/custom-model-manager';
+} from '@/lib';
 import { Search, Plus, Pencil, Trash2, X } from 'lucide-react';
 
 

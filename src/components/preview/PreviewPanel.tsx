@@ -10,9 +10,8 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import type { UISchema, DataContext } from '@/types';
-import { UIRenderer, type EventHandler } from '@/lib/renderer';
-import { defaultRegistry, type ComponentRegistry } from '@/lib/component-registry';
-import { initializeDefaultRegistry } from '@/lib/shadcn-components';
+import { UIRenderer, defaultRegistry, initializeDefaultRegistry } from '@/lib';
+import type { EventHandler, ComponentRegistry } from '@/lib';
 import { ErrorBoundary, UnknownComponentPlaceholder, type FallbackProps } from './ErrorBoundary';
 
 // ============================================================================

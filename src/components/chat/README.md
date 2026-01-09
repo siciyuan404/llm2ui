@@ -19,6 +19,14 @@
 | ModelSwitcher.tsx | 模型切换器组件，快速切换已保存的 LLM 配置、显示当前提供商和模型 |
 | RenderedUICard.tsx | UI Schema 渲染卡片，在对话中直接渲染 AI 生成的 UI，支持全屏预览、复制 JSON、应用到编辑器 |
 | RenderedUICard.test.tsx | RenderedUICard 组件的单元测试 |
+| ChatCustomization.tsx | Chat 界面定制面板，配色方案选择、布局类型选择、主题选择 |
+| ColorSchemeSelector.tsx | 配色方案选择器，显示所有配色方案和预览 |
+| LayoutSelector.tsx | 布局选择器，显示所有布局类型和视觉预览 |
+| ContextSettingsPanel.tsx | LLM 上下文设置面板，主题/组件/案例/配色选择、Token 预算显示 |
+| ComponentSelector.tsx | 组件选择器，按类别分组显示组件，支持选择/取消选择和预设选择 |
+| ExampleSelector.tsx | 案例选择器，按类别分组显示案例，支持选择/取消选择，显示 Token 计数 |
+| ColorPresetSelector.tsx | 配色预设选择器，显示配色方案列表和预览 |
+| TokenBudgetControl.tsx | Token 预算控制组件，显示当前 Token 数、设置最大预算、显示各部分占用 |
 
 ## 更新提醒
 

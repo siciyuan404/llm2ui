@@ -24,9 +24,8 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { LLMConfig } from '@/lib/llm-service';
-import type { SavedLLMConfig } from '@/lib/llm-config-manager';
-import { getProviderPreset } from '@/lib/llm-providers';
+import type { LLMConfig, SavedLLMConfig } from '@/lib';
+import { getProviderPreset } from '@/lib';
 
 // ============================================================================
 // Types

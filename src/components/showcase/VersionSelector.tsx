@@ -11,7 +11,8 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { defaultRegistry, type ComponentRegistry } from '@/lib/component-registry';
+import { defaultRegistry } from '@/lib';
+import type { ComponentRegistry } from '@/lib';
 
 // ============================================================================
 // Types

@@ -41,21 +41,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import type { LLMConfig, LLMProvider } from '@/lib/llm-service';
-import { DEFAULT_CONFIGS } from '@/lib/llm-service';
+import type { LLMConfig, LLMProvider, ConfigValidationError, ModelInfo } from '@/lib';
 import {
+  DEFAULT_CONFIGS,
   PROVIDER_PRESETS,
   getProviderPreset,
   DEFAULT_SYSTEM_PROMPT,
-} from '@/lib/llm-providers';
-import {
-  validateLLMConfig,
-  type ConfigValidationError,
-} from '@/lib/llm-config-manager';
-import {
+  validateLLMConfigDetailed as validateLLMConfig,
   getAllModels,
-  type ModelInfo,
-} from '@/lib/custom-model-manager';
+} from '@/lib';
 import { ModelManagementDialog } from './ModelManagementDialog';
 import { Settings2 } from 'lucide-react';
 

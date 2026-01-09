@@ -20,7 +20,7 @@ import './index.css'
 console.log('[main.tsx] CSS loaded');
 
 // Initialize component registry with shadcn components
-import { initializeDefaultRegistry } from '@/lib/shadcn-components';
+import { initializeDefaultRegistry } from '@/lib';
 initializeDefaultRegistry();
 console.log('[main.tsx] Component registry initialized');
 
@@ -89,7 +89,7 @@ const ComponentShowcase = lazy(() => {
 });
 
 // Configure Monaco Editor (lazy, after basic imports)
-import('@/lib/monaco-config').catch(err => {
+import('@/lib/utils/monaco-config').catch(err => {
   console.warn('Monaco config failed to load:', err);
 });
 
@@ -108,7 +108,16 @@ if (!rootElement) {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<App />} />
+              {/* Showcase routes - supports /showcase, /showcase/tokens, /showcase/components, /showcase/examples, /showcase/themes */}
               <Route path="/showcase" element={<ComponentShowcase className="h-screen" />} />
+              <Route path="/showcase/tokens" element={<ComponentShowcase className="h-screen" initialModule="tokens" />} />
+              <Route path="/showcase/tokens/*" element={<ComponentShowcase className="h-screen" initialModule="tokens" />} />
+              <Route path="/showcase/components" element={<ComponentShowcase className="h-screen" initialModule="components" />} />
+              <Route path="/showcase/components/*" element={<ComponentShowcase className="h-screen" initialModule="components" />} />
+              <Route path="/showcase/examples" element={<ComponentShowcase className="h-screen" initialModule="examples" />} />
+              <Route path="/showcase/examples/*" element={<ComponentShowcase className="h-screen" initialModule="examples" />} />
+              <Route path="/showcase/themes" element={<ComponentShowcase className="h-screen" initialModule="themes" />} />
+              <Route path="/showcase/themes/*" element={<ComponentShowcase className="h-screen" initialModule="themes" />} />
             </Routes>
           </BrowserRouter>
         </Suspense>

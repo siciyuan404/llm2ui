@@ -1,0 +1,70 @@
+{
+  "UNKNOWN_COMPONENT": {
+    "message": "Unknown component type \"{{componentType}}\"",
+    "suggestion": "Check the component name. Available types: {{availableTypes}}"
+  },
+  "MISSING_REQUIRED_PROP": {
+    "message": "Component \"{{componentType}}\" is missing required property \"{{propName}}\"",
+    "suggestion": "Add property: {{propName}}: {{expectedType}}"
+  },
+  "INVALID_PROP_TYPE": {
+    "message": "Property \"{{propName}}\" has invalid type. Expected {{expectedType}}, got {{actualType}}",
+    "suggestion": "Change the value to type {{expectedType}}"
+  },
+  "INVALID_ENUM_VALUE": {
+    "message": "Invalid value \"{{actualValue}}\" for property \"{{propName}}\"",
+    "suggestion": "Valid values are: {{validValues}}"
+  },
+  "MISSING_VERSION": {
+    "message": "Schema is missing \"version\" field",
+    "suggestion": "Add \"version\": \"1.0\" to the schema"
+  },
+  "INVALID_VERSION": {
+    "message": "Version should be a string",
+    "suggestion": "Use \"version\": \"1.0\""
+  },
+  "MISSING_ROOT": {
+    "message": "Schema is missing \"root\" field",
+    "suggestion": "Add a root component to the schema"
+  },
+  "MISSING_ROOT_TYPE": {
+    "message": "Root component is missing \"type\" field",
+    "suggestion": "Add \"type\" field to root component"
+  },
+  "MISSING_ROOT_ID": {
+    "message": "Root component is missing \"id\" field",
+    "suggestion": "Add \"id\" field to root component"
+  },
+  "MISSING_COMPONENT_ID": {
+    "message": "Component \"{{componentType}}\" at {{path}} is missing \"id\" field",
+    "suggestion": "Add a unique \"id\" to the component"
+  },
+  "DUPLICATE_ID": {
+    "message": "Duplicate component ID \"{{id}}\" found",
+    "suggestion": "Use unique IDs for each component"
+  },
+  "JSON_SYNTAX_ERROR": {
+    "message": "JSON syntax error: {{details}}",
+    "suggestion": "Check for missing brackets, quotes, or commas"
+  },
+  "INCOMPLETE_JSON": {
+    "message": "JSON is incomplete",
+    "suggestion": "The JSON structure is not complete"
+  },
+  "MAX_DEPTH_EXCEEDED": {
+    "message": "Maximum nesting depth ({{maxDepth}}) exceeded",
+    "suggestion": "Reduce the nesting level of your components"
+  },
+  "EMOJI_IN_SCHEMA": {
+    "message": "Emoji \"{{emoji}}\" found in {{location}}",
+    "suggestion": "Use Icon component instead: { \"type\": \"Icon\", \"props\": { \"name\": \"{{iconName}}\" } }"
+  },
+  "INVALID_CHILDREN_TYPE": {
+    "message": "\"children\" should be an array",
+    "suggestion": "Wrap children in an array: \"children\": [...]"
+  },
+  "EMPTY_CHILDREN": {
+    "message": "Component has empty children array",
+    "suggestion": "Add child components or remove the children property"
+  }
+}

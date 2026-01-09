@@ -1,0 +1,145 @@
+{
+  "version": "1.0.0",
+  "description": "关键词到标签/分类的映射配置",
+  "mappings": [
+    {
+      "keywords": ["cherry", "cherry studio", "cherry风格", "cherry 风格", "cherry样式", "cherry 样式"],
+      "tags": ["cherry"],
+      "boost": 2.0
+    },
+    {
+      "keywords": ["聊天", "chat", "对话", "conversation", "消息", "message", "ai对话", "ai 对话"],
+      "tags": ["chat", "cherry"],
+      "boost": 1.5
+    },
+    {
+      "keywords": ["模型选择", "model selector", "模型切换", "选择模型", "llm", "ai模型"],
+      "tags": ["model", "cherry"],
+      "boost": 1.4
+    },
+    {
+      "keywords": ["助手", "assistant", "agent", "智能助手", "ai助手"],
+      "tags": ["assistant", "cherry"],
+      "boost": 1.4
+    },
+    {
+      "keywords": ["知识库", "knowledge", "knowledge base", "文档库", "rag"],
+      "tags": ["knowledge", "cherry"],
+      "boost": 1.4
+    },
+    {
+      "keywords": ["提示词", "prompt", "prompts", "提示词库", "prompt library"],
+      "tags": ["prompt", "cherry"],
+      "boost": 1.4
+    },
+    {
+      "keywords": ["翻译", "translate", "translation", "翻译面板"],
+      "tags": ["translation", "cherry"],
+      "boost": 1.3
+    },
+    {
+      "keywords": ["图片生成", "image generation", "生成图片", "ai绘画", "ai画图"],
+      "tags": ["image", "cherry"],
+      "boost": 1.3
+    },
+    {
+      "keywords": ["mcp", "mcp服务", "mcp server", "插件"],
+      "tags": ["mcp", "cherry"],
+      "boost": 1.3
+    },
+    {
+      "keywords": ["侧边栏", "sidebar", "侧栏", "左侧导航", "侧边导航"],
+      "tags": ["sidebar", "navigation"],
+      "boost": 1.5
+    },
+    {
+      "keywords": ["后台", "admin", "管理", "管理系统", "管理后台", "控制台", "console", "dashboard"],
+      "tags": ["admin", "dashboard"],
+      "category": "dashboard",
+      "boost": 1.3
+    },
+    {
+      "keywords": ["导航", "navigation", "nav", "菜单", "menu", "导航栏"],
+      "tags": ["navigation", "navbar"],
+      "category": "navigation",
+      "boost": 1.2
+    },
+    {
+      "keywords": ["表单", "form", "输入", "input", "提交"],
+      "tags": ["form"],
+      "category": "form",
+      "boost": 1.2
+    },
+    {
+      "keywords": ["登录", "login", "登陆", "签到", "signin", "sign in"],
+      "tags": ["login", "form"],
+      "category": "form",
+      "boost": 1.4
+    },
+    {
+      "keywords": ["注册", "register", "注册表单", "signup", "sign up"],
+      "tags": ["register", "form"],
+      "category": "form",
+      "boost": 1.4
+    },
+    {
+      "keywords": ["搜索", "search", "查找", "查询"],
+      "tags": ["search"],
+      "boost": 1.3
+    },
+    {
+      "keywords": ["卡片", "card", "卡片组", "数据卡片"],
+      "tags": ["card"],
+      "boost": 1.1
+    },
+    {
+      "keywords": ["表格", "table", "列表", "list", "数据表"],
+      "tags": ["table", "list"],
+      "boost": 1.1
+    },
+    {
+      "keywords": ["头部", "header", "顶部", "顶部导航", "顶栏"],
+      "tags": ["header", "navbar"],
+      "boost": 1.2
+    },
+    {
+      "keywords": ["底部", "footer", "页脚"],
+      "tags": ["footer"],
+      "boost": 1.1
+    },
+    {
+      "keywords": ["面包屑", "breadcrumb", "路径导航"],
+      "tags": ["breadcrumb"],
+      "category": "navigation",
+      "boost": 1.3
+    },
+    {
+      "keywords": ["标签页", "tabs", "tab", "选项卡"],
+      "tags": ["tabs"],
+      "category": "navigation",
+      "boost": 1.3
+    },
+    {
+      "keywords": ["步骤", "steps", "step", "向导", "wizard", "流程"],
+      "tags": ["steps"],
+      "category": "navigation",
+      "boost": 1.3
+    },
+    {
+      "keywords": ["设置", "settings", "配置", "config", "偏好"],
+      "tags": ["settings"],
+      "boost": 1.2
+    },
+    {
+      "keywords": ["响应式", "responsive", "自适应", "移动端", "mobile"],
+      "tags": ["responsive", "mobile"],
+      "boost": 1.1
+    },
+    {
+      "keywords": ["弹窗", "modal", "对话框", "dialog", "弹出框"],
+      "tags": ["modal"],
+      "category": "feedback",
+      "boost": 1.2
+    }
+  ]
+}

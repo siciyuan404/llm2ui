@@ -10,9 +10,8 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import type { ComponentDefinition, PlatformType } from '@/lib/component-registry';
-import { defaultRegistry } from '@/lib/component-registry';
-import { createPlatformAdapter } from '@/lib/platform-adapter';
+import type { ComponentDefinition, PlatformType } from '@/lib';
+import { defaultRegistry, createPlatformAdapter } from '@/lib';
 import { LivePreview, type PreviewTheme } from './LivePreview';
 
 // ============================================================================

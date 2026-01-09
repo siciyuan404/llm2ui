@@ -11,10 +11,10 @@
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import type { UISchema, UIComponent, DataContext } from '../types';
-import { extractPureSchema, render } from './renderer';
-import { serialize, deserialize } from './serialization';
-import { ComponentRegistry } from './component-registry';
-import { registerShadcnComponents } from './shadcn-components';
+import { extractPureSchema, render } from './core/renderer';
+import { serialize, deserialize } from './core/serialization';
+import { ComponentRegistry } from './core/component-registry';
+import { registerShadcnComponents } from './core/shadcn-components';
 
 /**
  * Generator for valid component types

@@ -128,7 +128,7 @@ export function DefaultErrorFallback({ error, resetErrorBoundary }: FallbackProp
 import {
   unknownComponentLogger,
   getUnknownComponentSuggestions,
-} from '@/lib/error-handling';
+} from '@/lib/utils/error-handling';
 
 export interface UnknownComponentProps {
   /** The unknown component type */

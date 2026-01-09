@@ -10,7 +10,7 @@
 
 import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
-import { serialize, deserialize, schemasEqual } from './serialization';
+import { serialize, deserialize, schemasEqual } from './core/serialization';
 import type { UISchema, UIComponent, StyleProps, EventBinding } from '../types';
 
 // Arbitrary generators for UISchema types

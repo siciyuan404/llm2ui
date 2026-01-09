@@ -11,9 +11,9 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import type { ConversationMessage } from '@/lib/state-management';
+import type { ConversationMessage } from '@/lib';
 import type { UISchema, DataContext } from '@/types';
-import { extractUISchema } from '@/lib/llm-service';
+import { extractUISchema } from '@/lib';
 import { RenderedUICard } from './RenderedUICard';
 
 // ============================================================================
@@ -202,8 +202,9 @@ function parseMessageContent(content: string): ContentPart[] {
     // Add the JSON code block
     const jsonContent = match[1].trim();
     if (jsonContent) {
-      // Try to detect if this is a UI Schema
-      const schema = extractUISchema('```json\n' + jsonContent + '\n```');
+      // Try to detect if this is a UI Schema (with autoFix to resolve type aliases)
+      const result = extractUISchema('```json\n' + jsonContent + '\n```', { autoFix: true });
+      const schema = result && 'schema' in result ? result.schema : result;
       if (schema) {
         parts.push({ type: 'uischema', content: jsonContent, schema });
       } else {

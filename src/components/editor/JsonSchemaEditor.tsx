@@ -10,7 +10,7 @@
 import { useCallback, useRef, useEffect } from 'react';
 import Editor, { type OnMount, type OnChange } from '@monaco-editor/react';
 import type { editor } from 'monaco-editor';
-import { validateJSON, validateUISchema } from '@/lib/validation';
+import { validateJSON, validateUISchema } from '@/lib';
 import type { ValidationError } from '@/types';
 
 export interface JsonSchemaEditorProps {

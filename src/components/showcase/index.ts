@@ -8,13 +8,8 @@
 
 export {
   ComponentShowcase,
-  createInitialShowcaseState,
-  filterComponents,
   type ShowcaseState,
-  type ShowcaseTab,
-  type ViewMode,
-  type PreviewSize,
-  type FilteredResult,
+  type ShowcaseModule,
   type ComponentShowcaseProps,
 } from './ComponentShowcase';
 
@@ -133,3 +128,89 @@ export {
   type PropertyDifference,
   type PlatformComparisonResult,
 } from './PlatformComparison';
+
+export {
+  SidebarNav,
+  filterCategories,
+  type SidebarNavProps,
+  type SidebarNavItem,
+  type SidebarNavCategory,
+} from './SidebarNav';
+
+export {
+  TokensModule,
+  type TokensModuleProps,
+  type TokenCategory,
+} from './TokensModule';
+
+export {
+  ComponentsModule,
+  ComponentDoc,
+  type ComponentsModuleProps,
+  type ComponentDocProps,
+  type ComponentCategoryConfig,
+  type PropTableRow,
+} from './ComponentsModule';
+
+export {
+  ExamplesModule,
+  ExampleDoc,
+  type ExamplesModuleProps,
+  type ExampleDocProps,
+  type ExampleCategoryConfig,
+} from './ExamplesModule';
+
+export {
+  ScreenSizeSwitcher,
+  useScreenSize,
+  getScreenSizeConfig,
+  getScreenSizeDimensions,
+  isValidScreenSize,
+  parseScreenSizeFromUrl,
+  SCREEN_SIZE_CONFIGS,
+  type ScreenSizeSwitcherProps,
+  type ScreenSize,
+  type ScreenSizeConfig,
+} from './ScreenSizeSwitcher';
+
+export {
+  ValidationFeedback,
+  LoadingState,
+  SuccessState,
+  ErrorState,
+  RetryProgress,
+  ErrorItem,
+  ErrorCategoryGroup,
+  ErrorList,
+  JsonErrorHighlight,
+  categorizeError,
+  getCategoryDisplayName,
+  groupErrorsByCategory,
+  formatErrorReport,
+  type ValidationFeedbackProps,
+  type GenerationStatus,
+  type ErrorCategory,
+  type CategorizedError,
+} from './ValidationFeedback';
+
+// 主题相关组件
+export {
+  ThemeSwitcher,
+  type ThemeSwitcherProps,
+} from './ThemeSwitcher';
+
+export {
+  ThemeCard,
+  type ThemeCardProps,
+} from './ThemeCard';
+
+export {
+  ThemePreview,
+  type ThemePreviewProps,
+} from './ThemePreview';
+
+export {
+  ThemeMarketplace,
+  type ThemeMarketplaceProps,
+  type ThemeCategory,
+} from './ThemeMarketplace';

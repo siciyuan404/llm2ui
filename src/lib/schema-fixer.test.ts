@@ -11,10 +11,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import fc from 'fast-check';
 import React from 'react';
-import { ComponentRegistry } from './component-registry';
-import { ComponentCatalog, TYPE_ALIAS_MAP } from './component-catalog';
-import { fixUISchema, generateComponentId } from './schema-fixer';
-import { validateUISchemaEnhanced } from './validation';
+import { ComponentRegistry } from './core/component-registry';
+import { ComponentCatalog, TYPE_ALIAS_MAP } from './core/component-catalog';
+import { fixUISchema, generateComponentId } from './core/schema-fixer';
+import { validateUISchemaEnhanced } from './core/validation';
 
 /**
  * Create a mock React component for testing

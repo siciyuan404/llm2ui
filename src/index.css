@@ -59,6 +59,209 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Cherry Studio Design Tokens */
+  :root {
+    /* Sidebar */
+    --cherry-sidebar-width: 60px;
+    
+    /* Navbar */
+    --cherry-navbar-height: 40px;
+    --cherry-navbar-background: rgba(244, 244, 244, 1);
+    --cherry-navbar-background-mac: rgba(255, 255, 255, 0.55);
+    
+    /* Colors - Light Theme */
+    --cherry-primary: #00b96b;
+    --cherry-primary-soft: rgba(0, 185, 107, 0.6);
+    --cherry-background: #ffffff;
+    --cherry-background-soft: rgba(0, 0, 0, 0.04);
+    --cherry-text-1: rgba(0, 0, 0, 1);
+    --cherry-text-2: rgba(0, 0, 0, 0.6);
+    --cherry-border: rgba(0, 0, 0, 0.1);
+    --cherry-icon: rgba(0, 0, 0, 0.6);
+    --cherry-hover: #eeeeee;
+    --cherry-active: rgba(0, 0, 0, 0.04);
+    
+    /* Chat */
+    --cherry-chat-background-user: rgba(0, 0, 0, 0.045);
+    --cherry-chat-background-assistant: transparent;
+    
+    /* List */
+    --cherry-list-item-border-radius: 10px;
+    
+    /* Avatar sizes */
+    --cherry-avatar-sm: 24px;
+    --cherry-avatar-md: 32px;
+    --cherry-avatar-lg: 48px;
+    
+    /* Button sizes */
+    --cherry-button-sm: 24px;
+    --cherry-button-md: 30px;
+    --cherry-button-lg: 36px;
+    
+    /* Icon sizes */
+    --cherry-icon-xs: 12px;
+    --cherry-icon-sm: 14px;
+    --cherry-icon-md: 16px;
+    --cherry-icon-lg: 20px;
+    --cherry-icon-xl: 24px;
+    
+    /* Icon colors */
+    --cherry-icon-primary: var(--cherry-primary);
+    --cherry-icon-secondary: rgba(0, 0, 0, 0.45);
+    --cherry-icon-muted: rgba(0, 0, 0, 0.25);
+    --cherry-icon-success: #52c41a;
+    --cherry-icon-warning: #faad14;
+    --cherry-icon-error: #ff4d4f;
+    --cherry-icon-info: #1890ff;
+    
+    /* Icon Unicode Characters - Navigation */
+    --cherry-icon-chat: "💬";
+    --cherry-icon-agents: "🤖";
+    --cherry-icon-files: "📁";
+    --cherry-icon-knowledge: "📚";
+    --cherry-icon-translate: "🌐";
+    --cherry-icon-image: "🖼️";
+    --cherry-icon-settings: "⚙️";
+    --cherry-icon-theme: "◐";
+    
+    /* Icon Unicode Characters - Actions */
+    --cherry-icon-send: "➤";
+    --cherry-icon-copy: "📋";
+    --cherry-icon-edit: "✏️";
+    --cherry-icon-delete: "🗑️";
+    --cherry-icon-refresh: "🔄";
+    --cherry-icon-search: "🔍";
+    --cherry-icon-filter: "🔽";
+    --cherry-icon-sort: "↕️";
+    --cherry-icon-expand: "⛶";
+    --cherry-icon-collapse: "⊟";
+    --cherry-icon-close: "✕";
+    --cherry-icon-menu: "☰";
+    --cherry-icon-more: "⋯";
+    --cherry-icon-add: "＋";
+    --cherry-icon-remove: "－";
+    
+    /* Icon Unicode Characters - Status */
+    --cherry-icon-check: "✓";
+    --cherry-icon-cross: "✗";
+    --cherry-icon-warning: "⚠️";
+    --cherry-icon-info: "ℹ️";
+    --cherry-icon-question: "❓";
+    --cherry-icon-loading: "⟳";
+    --cherry-icon-online: "●";
+    --cherry-icon-offline: "○";
+    
+    /* Icon Unicode Characters - Media */
+    --cherry-icon-play: "▶";
+    --cherry-icon-pause: "⏸";
+    --cherry-icon-stop: "⏹";
+    --cherry-icon-volume: "🔊";
+    --cherry-icon-mute: "🔇";
+    --cherry-icon-mic: "🎤";
+    --cherry-icon-camera: "📷";
+    --cherry-icon-attachment: "📎";
+    --cherry-icon-download: "⬇";
+    --cherry-icon-upload: "⬆";
+    
+    /* Icon Unicode Characters - Layout */
+    --cherry-icon-layout-horizontal: "☰";
+    --cherry-icon-layout-vertical: "▤";
+    --cherry-icon-sidebar-left: "◧";
+    --cherry-icon-sidebar-right: "◨";
+    --cherry-icon-fullscreen: "⛶";
+    --cherry-icon-split: "⇔";
+    --cherry-icon-grid: "▦";
+    --cherry-icon-list: "☰";
+    
+    /* Icon Unicode Characters - Arrows */
+    --cherry-icon-arrow-up: "↑";
+    --cherry-icon-arrow-down: "↓";
+    --cherry-icon-arrow-left: "←";
+    --cherry-icon-arrow-right: "→";
+    --cherry-icon-chevron-up: "▲";
+    --cherry-icon-chevron-down: "▼";
+    --cherry-icon-chevron-left: "◀";
+    --cherry-icon-chevron-right: "▶";
+    
+    /* Icon Unicode Characters - Code */
+    --cherry-icon-code: "</>";
+    --cherry-icon-terminal: "⌘";
+    --cherry-icon-bug: "🐛";
+    --cherry-icon-git: "⎇";
+    --cherry-icon-branch: "⑂";
+    
+    /* Icon Unicode Characters - AI/Model */
+    --cherry-icon-ai: "🤖";
+    --cherry-icon-brain: "🧠";
+    --cherry-icon-sparkle: "✨";
+    --cherry-icon-magic: "🪄";
+    --cherry-icon-vision: "👁️";
+    --cherry-icon-reasoning: "💭";
+    --cherry-icon-tools: "🔧";
+    --cherry-icon-web: "🌐";
+    
+    /* Icon Unicode Characters - User */
+    --cherry-icon-user: "👤";
+    --cherry-icon-users: "👥";
+    --cherry-icon-profile: "👤";
+    --cherry-icon-logout: "🚪";
+    --cherry-icon-login: "🔑";
+    
+    /* Icon Unicode Characters - Documents */
+    --cherry-icon-doc: "📄";
+    --cherry-icon-folder: "📁";
+    --cherry-icon-folder-open: "📂";
+    --cherry-icon-pdf: "📕";
+    --cherry-icon-excel: "📊";
+    --cherry-icon-word: "📝";
+    --cherry-icon-markdown: "📑";
+    
+    /* Icon Unicode Characters - Communication */
+    --cherry-icon-message: "💬";
+    --cherry-icon-notification: "🔔";
+    --cherry-icon-email: "✉️";
+    --cherry-icon-share: "🔗";
+    --cherry-icon-bookmark: "🔖";
+    --cherry-icon-star: "⭐";
+    --cherry-icon-heart: "❤️";
+    --cherry-icon-like: "👍";
+    
+    /* Icon Unicode Characters - Time */
+    --cherry-icon-clock: "🕐";
+    --cherry-icon-calendar: "📅";
+    --cherry-icon-history: "🕒";
+    
+    /* Icon Unicode Characters - Security */
+    --cherry-icon-lock: "🔒";
+    --cherry-icon-unlock: "🔓";
+    --cherry-icon-key: "🔑";
+    --cherry-icon-shield: "🛡️";
+    --cherry-icon-eye: "👁";
+    --cherry-icon-eye-off: "👁‍🗨";
+  }
+
+  .dark {
+    /* Cherry Studio Dark Theme */
+    --cherry-navbar-background: rgba(24, 24, 24, 1);
+    --cherry-navbar-background-mac: rgba(24, 24, 24, 0.85);
+    
+    --cherry-background: #181818;
+    --cherry-background-soft: #222222;
+    --cherry-text-1: rgba(255, 255, 245, 0.9);
+    --cherry-text-2: rgba(235, 235, 245, 0.6);
+    --cherry-border: rgba(255, 255, 255, 0.1);
+    --cherry-icon: rgba(255, 255, 255, 0.6);
+    --cherry-hover: rgba(40, 40, 40, 1);
+    --cherry-active: rgba(55, 55, 55, 1);
+    
+    --cherry-chat-background-user: rgba(255, 255, 255, 0.08);
+    --cherry-chat-background-assistant: transparent;
+    
+    /* Icon colors - Dark Theme */
+    --cherry-icon-secondary: rgba(255, 255, 255, 0.45);
+    --cherry-icon-muted: rgba(255, 255, 255, 0.25);
+  }
 }
 
 @layer utilities {

@@ -58,7 +58,9 @@
     "build:styles": "node scripts/build-styles.cjs",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run build",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest --run",
+    "test:watch": "vitest"
   },
   "keywords": [
     "llm2ui",
@@ -117,13 +119,18 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "fast-check": "^4.5.2",
+    "jsdom": "^27.3.0",
     "rimraf": "^6.0.1",
     "typescript": "~5.9.3",
     "vite": "^7.2.4",
-    "vite-plugin-dts": "^4.5.4"
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^4.0.16"
   },
   "engines": {
     "node": ">=18.0.0"

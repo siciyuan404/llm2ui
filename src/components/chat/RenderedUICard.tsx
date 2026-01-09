@@ -16,8 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { UIRenderer, type EventHandler } from '@/lib/renderer';
-import { defaultRegistry } from '@/lib/component-registry';
+import { UIRenderer, defaultRegistry } from '@/lib';
+import type { EventHandler } from '@/lib';
 import type { UISchema, DataContext, EventAction } from '@/types';
 
 // ============================================================================

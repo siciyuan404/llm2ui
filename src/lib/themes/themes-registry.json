@@ -1,0 +1,39 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-01-04T00:00:00.000Z",
+  "themes": [
+    {
+      "id": "shadcn-ui",
+      "name": "shadcn/ui",
+      "description": "基于 Radix UI 和 Tailwind CSS 的现代 UI 组件库主题",
+      "version": "1.0.0",
+      "author": "LLM2UI Team",
+      "repository": "https://github.com/shadcn/ui",
+      "previewImage": "/themes/shadcn-ui-preview.png",
+      "category": "builtin",
+      "downloadUrl": ""
+    },
+    {
+      "id": "cherry",
+      "name": "Cherry Studio",
+      "description": "现代化 AI 聊天客户端风格主题，深色主题为主，紫色主色调",
+      "version": "1.0.0",
+      "author": "LLM2UI Team",
+      "repository": "https://github.com/kangfenmao/cherry-studio",
+      "previewImage": "/themes/cherry-preview.png",
+      "category": "builtin",
+      "downloadUrl": ""
+    },
+    {
+      "id": "discord",
+      "name": "Discord",
+      "description": "深色游戏风主题，紫蓝主色调，模仿 Discord 聊天应用界面",
+      "version": "1.0.0",
+      "author": "LLM2UI Team",
+      "repository": "https://github.com/discord",
+      "previewImage": "/themes/discord-preview.png",
+      "category": "builtin",
+      "downloadUrl": ""
+    }
+  ]
+}

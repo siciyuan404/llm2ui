@@ -15,8 +15,8 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import type { ComponentDefinition, ComponentExample, ComponentRegistry } from '@/lib/component-registry';
-import { defaultRegistry } from '@/lib/component-registry';
+import type { ComponentDefinition, ComponentExample, ComponentRegistry } from '@/lib';
+import { defaultRegistry } from '@/lib';
 import type { UISchema } from '@/types';
 import { ExamplePreview } from './LivePreview';
 import { CustomExampleForm } from './CustomExampleForm';
@@ -24,8 +24,8 @@ import {
   getExamplesByComponent,
   createExample,
   deleteExample,
-  type CustomExample,
-} from '@/lib/custom-examples-storage';
+} from '@/lib';
+import type { CustomExample } from '@/lib';
 
 // ============================================================================
 // Types

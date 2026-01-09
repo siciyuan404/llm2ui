@@ -7,118 +7,101 @@
  * Supports loading schema from showcase via sessionStorage.
  * Integrates LLM configuration and Schema sync functionality.
  * 
+ * Refactored to use centralized state management (Zustand) and custom hooks.
+ * 
  * @see Requirements 6.1 - Main interface provides access to Component_Showcase
  * @see Requirements 11.4 - "Open in Editor" functionality from showcase
  * @see Requirements 3.1-3.11 - Chat interface with LLM integration
  * @see Requirements 4.1, 4.2, 4.4 - Schema sync to editors
+ * @see Requirements 3.3, 4.6 - Use hooks and store for state management
  */
 
 import { ThreeColumnLayout, ResizeHandle } from '@/components/layout';
 import { ChatInterface } from '@/components/chat';
 import { JsonSchemaEditor, DataBindingEditor } from '@/components/editor';
 import { PreviewPanelWithControls } from '@/components/preview';
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { UISchema, DataContext } from '@/types';
-import type { ConversationMessage } from '@/lib/state-management';
+import type { ConversationMessage } from '@/types/state.types';
+import { useAppStore } from '@/stores';
 import {
-  createInitialChatState,
-  addConversationToState,
-  createConversation,
-  addMessageToConversation,
-  updateMessageInConversation,
-  getActiveConversation,
-  updateConversationInState,
-  type ChatState,
-} from '@/lib/state-management';
-import type { LLMConfig } from '@/lib/llm-service';
-import { loadCurrentLLMConfig, saveCurrentLLMConfig } from '@/lib/llm-config-manager';
-import { SchemaSyncer, type SyncResult } from '@/lib/schema-sync';
+  useSchemaSync,
+  useLLMConfig,
+  useEditorResize,
+  useChatState,
+} from '@/hooks';
+import { STORAGE_KEYS } from '@/constants';
 
 function App() {
-  const [schema, setSchema] = useState<UISchema | null>(null);
-  const [dataContext, setDataContext] = useState<DataContext>({});
-  const [jsonContent, setJsonContent] = useState('');
-  const [chatState, setChatState] = useState<ChatState>(() => {
-    // Initialize with a default conversation
-    const initialState = createInitialChatState();
-    const conversation = createConversation('New Chat');
-    return addConversationToState(initialState, conversation);
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  // ========================================
+  // Store State
+  // ========================================
+  const schema = useAppStore((state) => state.schema);
+  const jsonContent = useAppStore((state) => state.jsonContent);
+  const dataContext = useAppStore((state) => state.dataContext);
+  const setSchema = useAppStore((state) => state.setSchema);
+  const setJsonContent = useAppStore((state) => state.setJsonContent);
+  const setDataContext = useAppStore((state) => state.setDataContext);
+
+  // ========================================
+  // Custom Hooks
+  // ========================================
   
-  // LLM configuration state
-  const [llmConfig, setLLMConfig] = useState<LLMConfig | null>(() => {
-    return loadCurrentLLMConfig();
-  });
+  // Schema sync hook
+  const { schemaSyncer, handleSyncResult } = useSchemaSync();
   
-  // Schema syncer instance (memoized to prevent recreation)
-  const schemaSyncer = useMemo(() => new SchemaSyncer(), []);
+  // LLM config hook
+  const { config: llmConfig, setConfig: setLLMConfig } = useLLMConfig();
   
-  // Editor panel resize state
-  const [editorSplitPercent, setEditorSplitPercent] = useState(70); // JsonSchemaEditor takes 70%
-  const [isResizingEditor, setIsResizingEditor] = useState(false);
-  const editorContainerRef = useRef<HTMLDivElement>(null);
-  const dragStartRef = useRef({ y: 0, percent: 70 });
+  // Editor resize hook
+  const {
+    splitPercent: editorSplitPercent,
+    isResizing: isResizingEditor,
+    handleResizeStart: handleEditorResizeStart,
+    containerRef: editorContainerRef,
+  } = useEditorResize();
+  
+  // Chat state hook
+  const {
+    messages,
+    sendMessage,
+    updateMessage,
+    clearConversation,
+    isLoading,
+    setLoading,
+  } = useChatState();
+
+  // ========================================
+  // Effects
+  // ========================================
 
   // Check for schema from showcase on mount
   useEffect(() => {
-    const storedSchema = sessionStorage.getItem('llm2ui-schema');
+    const storedSchema = sessionStorage.getItem(STORAGE_KEYS.SCHEMA_CACHE);
     if (storedSchema) {
       try {
         const parsed = JSON.parse(storedSchema) as UISchema;
         setSchema(parsed);
         setJsonContent(JSON.stringify(parsed, null, 2));
         // Clear the stored schema after loading
-        sessionStorage.removeItem('llm2ui-schema');
+        sessionStorage.removeItem(STORAGE_KEYS.SCHEMA_CACHE);
       } catch {
         // Invalid JSON, ignore
-        sessionStorage.removeItem('llm2ui-schema');
+        sessionStorage.removeItem(STORAGE_KEYS.SCHEMA_CACHE);
       }
     }
-  }, []);
+  }, [setSchema, setJsonContent]);
 
-  // Subscribe to schema sync events
-  useEffect(() => {
-    const unsubscribe = schemaSyncer.onSync((event) => {
-      if (event.type === 'schema_updated' && event.schema) {
-        setSchema(event.schema);
-        setJsonContent(JSON.stringify(event.schema, null, 2));
-      } else if (event.type === 'data_updated' && event.data) {
-        setDataContext(event.data);
-      }
-    });
-    return unsubscribe;
-  }, [schemaSyncer]);
-
-  // Get current conversation messages
-  const activeConversation = getActiveConversation(chatState);
-  const messages = activeConversation?.messages ?? [];
+  // ========================================
+  // Callbacks
+  // ========================================
 
   // Handle schema changes from chat
   const handleSchemaExtracted = useCallback((newSchema: UISchema) => {
     setSchema(newSchema);
     setJsonContent(JSON.stringify(newSchema, null, 2));
-  }, []);
-
-  // Handle LLM config changes
-  const handleLLMConfigChange = useCallback((config: LLMConfig) => {
-    setLLMConfig(config);
-    saveCurrentLLMConfig(config);
-  }, []);
-
-  // Handle schema sync results
-  const handleSchemaSync = useCallback((result: SyncResult) => {
-    if (result.success) {
-      if (result.schema) {
-        setSchema(result.schema);
-        setJsonContent(JSON.stringify(result.schema, null, 2));
-      }
-      if (result.data) {
-        setDataContext(result.data);
-      }
-    }
-  }, []);
+  }, [setSchema, setJsonContent]);
 
   // Handle JSON content changes from editor
   const handleJsonChange = useCallback((content: string) => {
@@ -131,77 +114,31 @@ function App() {
     } catch {
       // Invalid JSON, don't update schema
     }
-  }, []);
+  }, [setJsonContent, setSchema]);
 
   // Handle data context changes
   const handleDataChange = useCallback((newData: DataContext) => {
     setDataContext(newData);
-  }, []);
+  }, [setDataContext]);
 
-  // Handle sending a message
+  // Handle sending a message (adapter for ChatInterface)
   const handleSendMessage = useCallback((message: ConversationMessage) => {
-    setChatState(prev => {
-      const conversation = getActiveConversation(prev);
-      if (!conversation) return prev;
-      const updated = addMessageToConversation(conversation, message);
-      return updateConversationInState(prev, updated);
-    });
-  }, []);
+    sendMessage(message);
+  }, [sendMessage]);
 
-  // Handle message updates (streaming)
+  // Handle message updates (streaming) - adapter for ChatInterface
   const handleMessageUpdate = useCallback((messageId: string, updates: Partial<ConversationMessage>) => {
-    setChatState(prev => {
-      const conversation = getActiveConversation(prev);
-      if (!conversation) return prev;
-      const updated = updateMessageInConversation(conversation, messageId, updates);
-      return updateConversationInState(prev, updated);
-    });
-  }, []);
+    updateMessage(messageId, updates);
+  }, [updateMessage]);
 
   // Handle clearing the conversation
   const handleClearConversation = useCallback(() => {
-    setChatState(prev => {
-      const conversation = getActiveConversation(prev);
-      if (!conversation) return prev;
-      // Create a new conversation with the same ID but empty messages
-      const clearedConversation = createConversation('New Chat', conversation.id);
-      return updateConversationInState(prev, clearedConversation);
-    });
-  }, []);
+    clearConversation();
+  }, [clearConversation]);
 
-  // Handle editor panel resize drag
-  const handleEditorResizeStart = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsResizingEditor(true);
-    dragStartRef.current = { y: e.clientY, percent: editorSplitPercent };
-  }, [editorSplitPercent]);
-
-  useEffect(() => {
-    if (!isResizingEditor) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const container = editorContainerRef.current;
-      if (!container) return;
-
-      const containerHeight = container.getBoundingClientRect().height;
-      const deltaY = e.clientY - dragStartRef.current.y;
-      const deltaPercent = (deltaY / containerHeight) * 100;
-      const newPercent = Math.max(20, Math.min(90, dragStartRef.current.percent + deltaPercent));
-      setEditorSplitPercent(newPercent);
-    };
-
-    const handleMouseUp = () => {
-      setIsResizingEditor(false);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isResizingEditor]);
+  // ========================================
+  // Render
+  // ========================================
 
   // Chat panel content
   const chatPanel = (
@@ -211,11 +148,11 @@ function App() {
       onMessageUpdate={handleMessageUpdate}
       onSchemaExtracted={handleSchemaExtracted}
       llmConfig={llmConfig ?? undefined}
-      onLLMConfigChange={handleLLMConfigChange}
+      onLLMConfigChange={setLLMConfig}
       isLoading={isLoading}
-      onLoadingChange={setIsLoading}
+      onLoadingChange={setLoading}
       schemaSyncer={schemaSyncer}
-      onSchemaSync={handleSchemaSync}
+      onSchemaSync={handleSyncResult}
       onClearConversation={handleClearConversation}
       dataContext={dataContext}
     />
@@ -281,4 +218,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

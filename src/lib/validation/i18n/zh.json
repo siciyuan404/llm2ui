@@ -1,0 +1,70 @@
+{
+  "UNKNOWN_COMPONENT": {
+    "message": "未知组件类型 \"{{componentType}}\"",
+    "suggestion": "请检查组件名称是否正确，可用组件：{{availableTypes}}"
+  },
+  "MISSING_REQUIRED_PROP": {
+    "message": "组件 \"{{componentType}}\" 缺少必填属性 \"{{propName}}\"",
+    "suggestion": "请添加属性：{{propName}}: {{expectedType}}"
+  },
+  "INVALID_PROP_TYPE": {
+    "message": "属性 \"{{propName}}\" 类型无效。期望 {{expectedType}}，实际 {{actualType}}",
+    "suggestion": "请将值改为 {{expectedType}} 类型"
+  },
+  "INVALID_ENUM_VALUE": {
+    "message": "属性 \"{{propName}}\" 的值 \"{{actualValue}}\" 无效",
+    "suggestion": "有效值为：{{validValues}}"
+  },
+  "MISSING_VERSION": {
+    "message": "Schema 缺少 \"version\" 字段",
+    "suggestion": "请添加 \"version\": \"1.0\""
+  },
+  "INVALID_VERSION": {
+    "message": "version 应该是字符串类型",
+    "suggestion": "请使用 \"version\": \"1.0\""
+  },
+  "MISSING_ROOT": {
+    "message": "Schema 缺少 \"root\" 字段",
+    "suggestion": "请添加根组件"
+  },
+  "MISSING_ROOT_TYPE": {
+    "message": "根组件缺少 \"type\" 字段",
+    "suggestion": "请为根组件添加 \"type\" 字段"
+  },
+  "MISSING_ROOT_ID": {
+    "message": "根组件缺少 \"id\" 字段",
+    "suggestion": "请为根组件添加 \"id\" 字段"
+  },
+  "MISSING_COMPONENT_ID": {
+    "message": "位于 {{path}} 的组件 \"{{componentType}}\" 缺少 \"id\" 字段",
+    "suggestion": "请为组件添加唯一的 \"id\""
+  },
+  "DUPLICATE_ID": {
+    "message": "发现重复的组件 ID \"{{id}}\"",
+    "suggestion": "请为每个组件使用唯一的 ID"
+  },
+  "JSON_SYNTAX_ERROR": {
+    "message": "JSON 语法错误：{{details}}",
+    "suggestion": "请检查是否缺少括号、引号或逗号"
+  },
+  "INCOMPLETE_JSON": {
+    "message": "JSON 不完整",
+    "suggestion": "JSON 结构未完成"
+  },
+  "MAX_DEPTH_EXCEEDED": {
+    "message": "超过最大嵌套深度 ({{maxDepth}})",
+    "suggestion": "请减少组件的嵌套层级"
+  },
+  "EMOJI_IN_SCHEMA": {
+    "message": "在 {{location}} 发现 emoji \"{{emoji}}\"",
+    "suggestion": "请使用 Icon 组件替代：{ \"type\": \"Icon\", \"props\": { \"name\": \"{{iconName}}\" } }"
+  },
+  "INVALID_CHILDREN_TYPE": {
+    "message": "\"children\" 应该是数组类型",
+    "suggestion": "请将 children 包装为数组：\"children\": [...]"
+  },
+  "EMPTY_CHILDREN": {
+    "message": "组件的 children 数组为空",
+    "suggestion": "请添加子组件或移除 children 属性"
+  }
+}

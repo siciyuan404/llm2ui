@@ -11,10 +11,9 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import type { ComponentDefinition } from '@/lib/component-registry';
+import type { ComponentDefinition } from '@/lib';
 import type { UISchema } from '@/types';
-import { UIRenderer } from '@/lib/renderer';
-import { defaultRegistry } from '@/lib/component-registry';
+import { UIRenderer, defaultRegistry } from '@/lib';
 import { ErrorBoundary, DefaultErrorFallback } from '@/components/preview/ErrorBoundary';
 
 // ============================================================================

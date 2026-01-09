@@ -8,7 +8,7 @@
  */
 
 import { useState, useCallback, useMemo } from 'react';
-import { extractDataFields, type DataField } from '@/lib/data-binding';
+import { extractDataFields, type DataField } from '@/lib';
 import type { UISchema, DataContext } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

@@ -1,35 +1,29 @@
 /**
- * ComponentShowcase - Main showcase page for component library
+ * ComponentShowcase - Main showcase page for design system documentation
  * 
- * Displays all registered UI components with filtering, search, and preview capabilities.
- * Implements a sidebar + main content area + detail panel layout.
- * Shows component details including preview, props, and examples when a component is selected.
- * Supports light/dark theme switching for component previews.
+ * Refactored as a design system documentation center with three main modules:
+ * - Tokens: Design tokens (Icons, Typography, Colors, Spacing, Shadows, Border Radius)
+ * - Components: Component library with documentation
+ * - Examples: UI examples and patterns
+ * 
+ * Supports module switching via tabs and URL routing.
+ * Now integrates with the multi-theme system to display theme-specific content.
  * 
  * @module ComponentShowcase
- * @see Requirements 6.1, 6.2, 6.3, 11.1, 11.2, 11.3, 11.4, 15.2
+ * @see Requirements 1.1, 2.1, 3.1, 5.1
  */
 
 import * as React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { 
-  defaultRegistry, 
-  type ComponentRegistry, 
-  type PlatformType,
-  type ComponentDefinition 
-} from '@/lib/component-registry';
-import { initializeDefaultRegistry } from '@/lib/shadcn-components';
-import { ComponentList } from './ComponentList';
-import { SearchInput } from './SearchInput';
-import { PlatformSwitcher } from './PlatformSwitcher';
-import { CategoryFilter } from './CategoryFilter';
-import { LivePreview } from './LivePreview';
-import { PropsPanel } from './PropsPanel';
-import { ExamplesTab } from './ExamplesTab';
-import { ResponsivePreviewSelector } from './ResponsivePreviewSelector';
-import { FullscreenPreview } from './FullscreenPreview';
-import { UpgradeAlert } from './UpgradeAlert';
+import { Palette, Package, ClipboardList, Paintbrush } from 'lucide-react';
+import { TokensModule, type TokenCategory } from './TokensModule';
+import { ComponentsModule } from './ComponentsModule';
+import { ExamplesModule } from './ExamplesModule';
+import { ThemeMarketplace } from './ThemeMarketplace';
+import { ThemeSwitcher } from './ThemeSwitcher';
+import { ScreenSizeSwitcher, parseScreenSizeFromUrl, type ScreenSize } from './ScreenSizeSwitcher';
+import { getThemeManager, type ThemePack } from '@/lib/themes';
 import type { UISchema } from '@/types';
 
 // ============================================================================
@@ -37,65 +31,30 @@ import type { UISchema } from '@/types';
 // ============================================================================
 
 /**
- * View mode for component display
+ * Showcase module type
  */
-export type ViewMode = 'grid' | 'list';
-
-/**
- * Preview size for responsive preview
- */
-export type PreviewSize = 'desktop' | 'tablet' | 'mobile';
-
-/**
- * Tab options for component details
- */
-export type ShowcaseTab = 'preview' | 'props' | 'examples' | 'code';
+export type ShowcaseModule = 'tokens' | 'components' | 'examples' | 'themes';
 
 /**
  * Showcase state management interface
- * @see Design Document: ShowcaseState
  */
 export interface ShowcaseState {
-  /** Currently selected platform filter */
-  selectedPlatform: PlatformType | null;
-  /** Currently selected category filter */
-  selectedCategory: string | null;
-  /** Search query string */
-  searchQuery: string;
-  /** View mode (grid or list) */
-  viewMode: ViewMode;
-  /** Preview theme (light or dark) */
-  previewTheme: 'light' | 'dark';
-  /** Preview size for responsive preview */
-  previewSize: PreviewSize;
-  /** Currently selected component name */
-  selectedComponent: string | null;
-  /** Currently active tab */
-  selectedTab: ShowcaseTab;
-  /** Whether fullscreen preview is open */
-  isFullscreenOpen: boolean;
-}
-
-/**
- * Filtered result interface
- */
-export interface FilteredResult {
-  /** Filtered components */
-  components: ComponentDefinition[];
-  /** Total count before filtering */
-  totalCount: number;
-  /** Count by category */
-  categoryCount: Record<string, number>;
+  /** Currently active module */
+  activeModule: ShowcaseModule;
+  /** Currently selected item ID within the module */
+  activeItemId: string | null;
+  /** Screen size for preview */
+  screenSize: ScreenSize;
+  /** Theme (light or dark) */
+  theme: 'light' | 'dark';
 }
 
 /**
  * Props for ComponentShowcase
  */
 export interface ComponentShowcaseProps {
-  /** Component registry to use (defaults to defaultRegistry) */
-  registry?: ComponentRegistry;
-  /** Initial state override */
-  initialState?: Partial<ShowcaseState>;
+  /** Initial module to display */
+  initialModule?: ShowcaseModule;
   /** Callback when state changes */
   onStateChange?: (state: ShowcaseState) => void;
   /** Additional class name */
@@ -103,290 +62,54 @@ export interface ComponentShowcaseProps {
 }
 
 // ============================================================================
-// Initial State
+// Constants
 // ============================================================================
 
 /**
- * Create initial showcase state
+ * Module tab configuration
  */
-export function createInitialShowcaseState(
-  overrides?: Partial<ShowcaseState>
-): ShowcaseState {
-  return {
-    selectedPlatform: null,
-    selectedCategory: null,
-    searchQuery: '',
-    viewMode: 'grid',
-    previewTheme: 'light',
-    previewSize: 'desktop',
-    selectedComponent: null,
-    selectedTab: 'preview',
-    isFullscreenOpen: false,
-    ...overrides,
-  };
-}
+const MODULE_TABS: { id: ShowcaseModule; label: string; icon: React.ReactNode }[] = [
+  { id: 'tokens', label: 'Tokens', icon: <Palette className="w-4 h-4" /> },
+  { id: 'components', label: 'Components', icon: <Package className="w-4 h-4" /> },
+  { id: 'examples', label: 'Examples', icon: <ClipboardList className="w-4 h-4" /> },
+  { id: 'themes', label: 'Themes', icon: <Paintbrush className="w-4 h-4" /> },
+];
+
+/**
+ * Default token category
+ */
+const DEFAULT_TOKEN_CATEGORY: TokenCategory = 'icons';
 
 // ============================================================================
-// State Reducers
-// ============================================================================
-
-type ShowcaseAction =
-  | { type: 'SET_PLATFORM'; platform: PlatformType | null }
-  | { type: 'SET_CATEGORY'; category: string | null }
-  | { type: 'SET_SEARCH'; query: string }
-  | { type: 'SET_VIEW_MODE'; mode: ViewMode }
-  | { type: 'SET_PREVIEW_THEME'; theme: 'light' | 'dark' }
-  | { type: 'SET_PREVIEW_SIZE'; size: PreviewSize }
-  | { type: 'SET_SELECTED_COMPONENT'; component: string | null }
-  | { type: 'SET_SELECTED_TAB'; tab: ShowcaseTab }
-  | { type: 'SET_FULLSCREEN'; isOpen: boolean }
-  | { type: 'RESET_FILTERS' };
-
-function showcaseReducer(state: ShowcaseState, action: ShowcaseAction): ShowcaseState {
-  switch (action.type) {
-    case 'SET_PLATFORM':
-      return { ...state, selectedPlatform: action.platform };
-    case 'SET_CATEGORY':
-      return { ...state, selectedCategory: action.category };
-    case 'SET_SEARCH':
-      return { ...state, searchQuery: action.query };
-    case 'SET_VIEW_MODE':
-      return { ...state, viewMode: action.mode };
-    case 'SET_PREVIEW_THEME':
-      return { ...state, previewTheme: action.theme };
-    case 'SET_PREVIEW_SIZE':
-      return { ...state, previewSize: action.size };
-    case 'SET_SELECTED_COMPONENT':
-      return { ...state, selectedComponent: action.component };
-    case 'SET_SELECTED_TAB':
-      return { ...state, selectedTab: action.tab };
-    case 'SET_FULLSCREEN':
-      return { ...state, isFullscreenOpen: action.isOpen };
-    case 'RESET_FILTERS':
-      return {
-        ...state,
-        selectedPlatform: null,
-        selectedCategory: null,
-        searchQuery: '',
-      };
-    default:
-      return state;
-  }
-}
-
-// ============================================================================
-// Filter Logic
+// Helper Functions
 // ============================================================================
 
 /**
- * Filter components based on current state
+ * Parse module from URL path
  */
-export function filterComponents(
-  registry: ComponentRegistry,
-  state: ShowcaseState
-): FilteredResult {
-  const platform = state.selectedPlatform ?? undefined;
-  
-  // Get all components for the platform
-  let components = registry.getAll(platform);
-  const totalCount = components.length;
-  
-  // Calculate category counts before filtering
-  const categoryCount: Record<string, number> = {};
-  for (const comp of components) {
-    const category = comp.category || 'uncategorized';
-    categoryCount[category] = (categoryCount[category] || 0) + 1;
-  }
-  
-  // Filter by category
-  if (state.selectedCategory) {
-    components = components.filter(c => c.category === state.selectedCategory);
-  }
-  
-  // Filter by search query
-  if (state.searchQuery.trim()) {
-    components = registry.search(state.searchQuery, platform);
-    // Re-apply category filter after search
-    if (state.selectedCategory) {
-      components = components.filter(c => c.category === state.selectedCategory);
-    }
-  }
-  
-  return {
-    components,
-    totalCount,
-    categoryCount,
-  };
-}
-
-// ============================================================================
-// Sub-Components
-// ============================================================================
-
-/**
- * Sidebar component for filters and navigation
- */
-function Sidebar({
-  state,
-  dispatch,
-  categories,
-  categoryCount,
-}: {
-  state: ShowcaseState;
-  dispatch: React.Dispatch<ShowcaseAction>;
-  categories: string[];
-  categoryCount: Record<string, number>;
-}) {
-  return (
-    <aside className="w-64 h-full border-r border-border bg-card flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-1">
-          <h1 className="text-lg font-semibold">组件库</h1>
-          <Link
-            to="/"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            title="返回主界面"
-          >
-            ← 返回
-          </Link>
-        </div>
-        <p className="text-sm text-muted-foreground">Component Showcase</p>
-      </div>
-
-      {/* Search */}
-      <div className="p-4 border-b border-border">
-        <SearchInput
-          value={state.searchQuery}
-          onChange={(query) => dispatch({ type: 'SET_SEARCH', query })}
-          placeholder="搜索组件..."
-        />
-      </div>
-
-      {/* Platform Filter */}
-      <div className="p-4 border-b border-border">
-        <h3 className="text-sm font-medium mb-2">平台</h3>
-        <PlatformSwitcher
-          selectedPlatform={state.selectedPlatform}
-          onPlatformChange={(platform) => dispatch({ type: 'SET_PLATFORM', platform })}
-        />
-      </div>
-
-      {/* Category Filter */}
-      <div className="flex-1 overflow-auto p-4">
-        <h3 className="text-sm font-medium mb-2">分类</h3>
-        <CategoryFilter
-          categories={categories}
-          categoryCount={categoryCount}
-          selectedCategory={state.selectedCategory}
-          onCategoryChange={(category) => dispatch({ type: 'SET_CATEGORY', category })}
-        />
-      </div>
-
-      {/* Reset Filters */}
-      {(state.selectedPlatform || state.selectedCategory || state.searchQuery) && (
-        <div className="p-4 border-t border-border">
-          <button
-            onClick={() => dispatch({ type: 'RESET_FILTERS' })}
-            className="w-full px-3 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            清除筛选
-          </button>
-        </div>
-      )}
-    </aside>
-  );
+function parseModuleFromPath(pathname: string): ShowcaseModule {
+  if (pathname.includes('/showcase/tokens')) return 'tokens';
+  if (pathname.includes('/showcase/components')) return 'components';
+  if (pathname.includes('/showcase/examples')) return 'examples';
+  if (pathname.includes('/showcase/themes')) return 'themes';
+  return 'tokens'; // Default to tokens
 }
 
 /**
- * Toolbar component for view controls
+ * Parse item ID from URL path
  */
-function Toolbar({
-  state,
-  dispatch,
-  componentCount,
-}: {
-  state: ShowcaseState;
-  dispatch: React.Dispatch<ShowcaseAction>;
-  componentCount: number;
-}) {
-  return (
-    <div className="flex items-center justify-between p-4 border-b border-border bg-card">
-      <div className="text-sm text-muted-foreground">
-        共 {componentCount} 个组件
-      </div>
-      <div className="flex items-center gap-2">
-        {/* View Mode Toggle */}
-        <div className="flex items-center border border-border rounded-md">
-          <button
-            onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'grid' })}
-            className={cn(
-              'px-3 py-1.5 text-sm transition-colors',
-              state.viewMode === 'grid'
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-muted'
-            )}
-            title="网格视图"
-          >
-            <GridIcon />
-          </button>
-          <button
-            onClick={() => dispatch({ type: 'SET_VIEW_MODE', mode: 'list' })}
-            className={cn(
-              'px-3 py-1.5 text-sm transition-colors',
-              state.viewMode === 'list'
-                ? 'bg-primary text-primary-foreground'
-                : 'hover:bg-muted'
-            )}
-            title="列表视图"
-          >
-            <ListIcon />
-          </button>
-        </div>
-
-        {/* Responsive Preview Selector */}
-        <ResponsivePreviewSelector
-          value={state.previewSize}
-          onChange={(size) => dispatch({ type: 'SET_PREVIEW_SIZE', size })}
-        />
-
-        {/* Theme Toggle */}
-        <button
-          onClick={() =>
-            dispatch({
-              type: 'SET_PREVIEW_THEME',
-              theme: state.previewTheme === 'light' ? 'dark' : 'light',
-            })
-          }
-          className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-muted transition-colors"
-          title={state.previewTheme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
-        >
-          {state.previewTheme === 'light' ? <MoonIcon /> : <SunIcon />}
-        </button>
-      </div>
-    </div>
-  );
+function parseItemIdFromPath(pathname: string, module: ShowcaseModule): string | null {
+  const basePath = `/showcase/${module}/`;
+  if (pathname.startsWith(basePath)) {
+    const itemId = pathname.slice(basePath.length);
+    return itemId || null;
+  }
+  return null;
 }
 
 // ============================================================================
 // Icons
 // ============================================================================
-
-function GridIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-    </svg>
-  );
-}
-
-function ListIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-    </svg>
-  );
-}
 
 function SunIcon() {
   return (
@@ -404,160 +127,86 @@ function MoonIcon() {
   );
 }
 
-function CloseIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  );
-}
-
-function FullscreenIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-    </svg>
-  );
-}
-
 // ============================================================================
-// Detail Panel Component
+// Sub-Components
 // ============================================================================
 
 /**
- * Tab labels for detail panel
+ * Header component with navigation and controls
  */
-const TAB_LABELS: Record<ShowcaseTab, string> = {
-  preview: '预览',
-  props: '属性',
-  examples: '案例',
-  code: '代码',
-};
-
-/**
- * Detail panel for selected component
- * Shows preview, props, and examples tabs
- * 
- * @see Requirements 11.1, 11.2, 11.3, 11.4, 15.2, 15.3, 15.4, 10.4
- */
-function DetailPanel({
-  component,
-  selectedTab,
-  previewTheme,
-  previewSize,
-  onTabChange,
-  onClose,
-  onOpenInEditor,
-  onFullscreen,
-  onVersionChange,
+function Header({
+  activeModule,
+  onModuleChange,
+  screenSize,
+  onScreenSizeChange,
+  theme,
+  onThemeToggle,
 }: {
-  component: ComponentDefinition;
-  selectedTab: ShowcaseTab;
-  previewTheme: 'light' | 'dark';
-  previewSize: PreviewSize;
-  onTabChange: (tab: ShowcaseTab) => void;
-  onClose: () => void;
-  onOpenInEditor?: (schema: UISchema) => void;
-  onFullscreen?: () => void;
-  onVersionChange?: (version: string) => void;
+  activeModule: ShowcaseModule;
+  onModuleChange: (module: ShowcaseModule) => void;
+  screenSize: ScreenSize;
+  onScreenSizeChange: (size: ScreenSize) => void;
+  theme: 'light' | 'dark';
+  onThemeToggle: () => void;
 }) {
-  const availableTabs: ShowcaseTab[] = ['preview', 'props', 'examples'];
-  
-  // Count examples for badge
-  const examplesCount = component.examples?.length ?? 0;
-
   return (
-    <aside className="w-96 h-full border-l border-border bg-card flex flex-col">
-      {/* Header */}
-      <div className="p-4 border-b border-border">
-        <div className="flex items-center justify-between mb-1">
-          <h2 className="text-lg font-semibold truncate" title={component.name}>
-            {component.name}
-          </h2>
-          <div className="flex items-center gap-1">
-            {onFullscreen && (
-              <button
-                onClick={onFullscreen}
-                className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted"
-                title="全屏预览"
-              >
-                <FullscreenIcon />
-              </button>
-            )}
+    <header className="h-14 px-4 flex items-center justify-between border-b border-border bg-card">
+      {/* Left: Title and Back Link */}
+      <div className="flex items-center gap-4">
+        <Link
+          to="/"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          title="返回主界面"
+        >
+          ← 返回
+        </Link>
+        <div className="h-4 w-px bg-border" />
+        <h1 className="text-lg font-semibold">Design System</h1>
+      </div>
+
+      {/* Center: Module Tabs */}
+      <nav className="flex items-center">
+        <div className="flex items-center bg-muted/50 rounded-lg p-1">
+          {MODULE_TABS.map((tab) => (
             <button
-              onClick={onClose}
-              className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded hover:bg-muted"
-              title="关闭详情"
+              key={tab.id}
+              onClick={() => onModuleChange(tab.id)}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                activeModule === tab.id
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
             >
-              <CloseIcon />
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
             </button>
-          </div>
+          ))}
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {component.description || '暂无描述'}
-        </p>
-        {component.version && (
-          <span className="inline-block mt-2 px-2 py-0.5 text-xs bg-muted rounded">
-            v{component.version}
-          </span>
-        )}
-        
-        {/* Upgrade Alert */}
-        <UpgradeAlert
-          component={component}
-          onUpgrade={onVersionChange}
-          compact={true}
-          className="mt-3"
+      </nav>
+
+      {/* Right: Controls */}
+      <div className="flex items-center gap-2">
+        {/* Theme Switcher */}
+        <ThemeSwitcher size="sm" />
+
+        {/* Screen Size Switcher */}
+        <ScreenSizeSwitcher
+          value={screenSize}
+          onChange={onScreenSizeChange}
+          syncWithUrl={true}
         />
-      </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-border">
-        {availableTabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => onTabChange(tab)}
-            className={cn(
-              'flex-1 px-4 py-2 text-sm font-medium transition-colors relative',
-              selectedTab === tab
-                ? 'text-primary border-b-2 border-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {TAB_LABELS[tab]}
-            {tab === 'examples' && examplesCount > 0 && (
-              <span className="ml-1 px-1.5 py-0.5 text-xs bg-muted rounded-full">
-                {examplesCount}
-              </span>
-            )}
-          </button>
-        ))}
+        {/* Theme Toggle */}
+        <button
+          onClick={onThemeToggle}
+          className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-muted transition-colors"
+          title={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
+        >
+          {theme === 'light' ? <MoonIcon /> : <SunIcon />}
+        </button>
       </div>
-
-      {/* Tab Content */}
-      <div className="flex-1 overflow-auto">
-        {selectedTab === 'preview' && (
-          <div className="p-4">
-            <LivePreview
-              component={component}
-              theme={previewTheme}
-              previewSize={previewSize}
-              showStateControls={true}
-              className="min-h-[200px]"
-            />
-          </div>
-        )}
-        {selectedTab === 'props' && (
-          <PropsPanel component={component} />
-        )}
-        {selectedTab === 'examples' && (
-          <ExamplesTab
-            component={component}
-            onOpenInEditor={onOpenInEditor}
-          />
-        )}
-      </div>
-    </aside>
+    </header>
   );
 }
 
@@ -565,147 +214,206 @@ function DetailPanel({
 // Main Component
 // ============================================================================
 
-// Initialize registry flag
-let registryInitialized = false;
-
 /**
  * ComponentShowcase - Main showcase page component
+ * 
+ * Design system documentation center with three modules:
+ * - Tokens: Design tokens display
+ * - Components: Component library documentation
+ * - Examples: UI examples and patterns
+ * 
+ * @see Requirements 1.1, 2.1, 3.1, 5.1
  */
 export function ComponentShowcase({
-  registry = defaultRegistry,
-  initialState,
+  initialModule,
   onStateChange,
   className,
 }: ComponentShowcaseProps) {
   const navigate = useNavigate();
-  
-  // Initialize registry once
-  React.useEffect(() => {
-    if (!registryInitialized) {
-      initializeDefaultRegistry();
-      registryInitialized = true;
-    }
-  }, []);
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  // Parse initial state from URL
+  const initialScreenSize = React.useMemo(() => {
+    return parseScreenSizeFromUrl(searchParams, 'size');
+  }, []); // Only compute once on mount
 
   // State management
-  const [state, dispatch] = React.useReducer(
-    showcaseReducer,
-    createInitialShowcaseState(initialState)
-  );
+  const [activeModule, setActiveModule] = React.useState<ShowcaseModule>(() => {
+    if (initialModule) return initialModule;
+    return parseModuleFromPath(location.pathname);
+  });
+
+  const [activeItemId, setActiveItemId] = React.useState<string | null>(() => {
+    return parseItemIdFromPath(location.pathname, activeModule);
+  });
+
+  const [screenSize, setScreenSize] = React.useState<ScreenSize>(initialScreenSize);
+  const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
+
+  // Token category state (for TokensModule)
+  const [tokenCategory, setTokenCategory] = React.useState<TokenCategory>(DEFAULT_TOKEN_CATEGORY);
+
+  // Theme system integration - subscribe to theme changes
+  const themeManager = React.useMemo(() => getThemeManager(), []);
+  const [activeTheme, setActiveTheme] = React.useState<ThemePack | null>(() => {
+    try {
+      return themeManager.getActiveTheme();
+    } catch {
+      return null;
+    }
+  });
+
+  // Subscribe to theme changes
+  React.useEffect(() => {
+    const unsubscribe = themeManager.subscribe((event) => {
+      setActiveTheme(event.newTheme);
+    });
+    return () => unsubscribe();
+  }, [themeManager]);
+
+  // Sync URL with state changes
+  React.useEffect(() => {
+    const currentPath = location.pathname;
+    const expectedBasePath = `/showcase/${activeModule}`;
+    
+    // Only update URL if module changed
+    if (!currentPath.startsWith(expectedBasePath)) {
+      const sizeParam = searchParams.get('size');
+      const newPath = sizeParam 
+        ? `${expectedBasePath}?size=${sizeParam}`
+        : expectedBasePath;
+      navigate(newPath, { replace: true });
+    }
+  }, [activeModule, location.pathname, navigate, searchParams]);
 
   // Notify parent of state changes
   React.useEffect(() => {
-    onStateChange?.(state);
-  }, [state, onStateChange]);
+    onStateChange?.({
+      activeModule,
+      activeItemId,
+      screenSize,
+      theme,
+    });
+  }, [activeModule, activeItemId, screenSize, theme, onStateChange]);
 
-  // Filter components
-  const { components, categoryCount } = filterComponents(registry, state);
-  const categories = registry.getCategories(state.selectedPlatform ?? undefined);
+  // Handle module change
+  const handleModuleChange = React.useCallback((module: ShowcaseModule) => {
+    setActiveModule(module);
+    setActiveItemId(null); // Reset item selection when switching modules
+  }, []);
 
-  // Get selected component definition
-  const selectedComponentDef = React.useMemo(() => {
-    if (!state.selectedComponent) return null;
-    return registry.get(state.selectedComponent);
-  }, [registry, state.selectedComponent]);
+  // Handle screen size change
+  const handleScreenSizeChange = React.useCallback((size: ScreenSize) => {
+    setScreenSize(size);
+  }, []);
 
-  // Check if any filters are active
-  const hasFilters = !!(state.selectedPlatform || state.selectedCategory || state.searchQuery);
+  // Handle theme toggle
+  const handleThemeToggle = React.useCallback(() => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  }, []);
 
   // Handle "Open in Editor" - navigate to main page with schema
   const handleOpenInEditor = React.useCallback((schema: UISchema) => {
-    // Store schema in sessionStorage for the main page to pick up
     sessionStorage.setItem('llm2ui-schema', JSON.stringify(schema));
     navigate('/');
   }, [navigate]);
 
-  // Handle close detail panel
-  const handleCloseDetail = React.useCallback(() => {
-    dispatch({ type: 'SET_SELECTED_COMPONENT', component: null });
-  }, []);
+  // Convert theme tokens to DesignTokens format for TokensModule
+  const themeDesignTokens = React.useMemo(() => {
+    if (!activeTheme) return undefined;
+    // ThemeTokens 和 DesignTokens 结构类似，可以直接使用
+    return activeTheme.tokens as unknown as import('@/lib/design-tokens').DesignTokens;
+  }, [activeTheme]);
 
-  // Handle open fullscreen preview
-  const handleOpenFullscreen = React.useCallback(() => {
-    dispatch({ type: 'SET_FULLSCREEN', isOpen: true });
-  }, []);
+  // Get component registry from active theme
+  const themeRegistry = React.useMemo(() => {
+    if (!activeTheme) return undefined;
+    // 使用 unknown 作为中间类型来绕过两个 ComponentRegistry 类型不兼容的问题
+    // 两个类的接口是兼容的，只是来自不同的模块
+    return activeTheme.components.registry as unknown as import('@/lib/component-registry').ComponentRegistry;
+  }, [activeTheme]);
 
-  // Handle close fullscreen preview
-  const handleCloseFullscreen = React.useCallback(() => {
-    dispatch({ type: 'SET_FULLSCREEN', isOpen: false });
-  }, []);
+  // Convert theme examples to ExampleMetadata format for ExamplesModule
+  const themeExamples = React.useMemo(() => {
+    if (!activeTheme) return undefined;
+    return activeTheme.examples.presets.map((preset) => ({
+      id: preset.id,
+      title: preset.name,
+      description: preset.description,
+      category: (preset.category || 'layout') as import('@/lib/examples/example-tags').ExampleCategory,
+      tags: preset.tags || [],
+      schema: preset.schema as UISchema,
+      source: 'system' as const,
+    }));
+  }, [activeTheme]);
 
-  // Handle version change - reload component with new version
-  const handleVersionChange = React.useCallback((version: string) => {
-    // For now, just log the version change
-    // In a full implementation, this would reload the component definition
-    // with the specified version from the registry
-    console.log(`Upgrade to version: ${version}`);
-    // The component would be reloaded with the new version
-    // This could trigger a re-fetch of the component definition
-  }, []);
+  // Render active module content
+  const renderModuleContent = () => {
+    switch (activeModule) {
+      case 'tokens':
+        return (
+          <TokensModule
+            activeCategory={tokenCategory}
+            onCategoryChange={setTokenCategory}
+            tokens={themeDesignTokens}
+            className="h-full"
+          />
+        );
+      case 'components':
+        return (
+          <ComponentsModule
+            activeComponent={activeItemId}
+            onComponentSelect={setActiveItemId}
+            previewSize={screenSize}
+            onPreviewSizeChange={handleScreenSizeChange}
+            onOpenInEditor={handleOpenInEditor}
+            registry={themeRegistry}
+            className="h-full"
+          />
+        );
+      case 'examples':
+        return (
+          <ExamplesModule
+            activeExampleId={activeItemId}
+            onExampleSelect={setActiveItemId}
+            previewSize={screenSize}
+            onPreviewSizeChange={handleScreenSizeChange}
+            onOpenInEditor={handleOpenInEditor}
+            examples={themeExamples}
+            className="h-full"
+          />
+        );
+      case 'themes':
+        return (
+          <ThemeMarketplace
+            onThemeActivate={(themeId) => {
+              console.log('Theme activated:', themeId);
+            }}
+            className="h-full"
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
-    <div className={cn('flex h-full bg-background', className)}>
-      {/* Sidebar */}
-      <Sidebar
-        state={state}
-        dispatch={dispatch}
-        categories={categories}
-        categoryCount={categoryCount}
+    <div className={cn('flex flex-col h-full bg-background', className)}>
+      {/* Header with tabs and controls */}
+      <Header
+        activeModule={activeModule}
+        onModuleChange={handleModuleChange}
+        screenSize={screenSize}
+        onScreenSizeChange={handleScreenSizeChange}
+        theme={theme}
+        onThemeToggle={handleThemeToggle}
       />
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Toolbar */}
-        <Toolbar
-          state={state}
-          dispatch={dispatch}
-          componentCount={components.length}
-        />
-
-        {/* Component Grid/List */}
-        <div className="flex-1 overflow-auto p-4">
-          <ComponentList
-            components={components}
-            viewMode={state.viewMode}
-            selectedComponent={state.selectedComponent}
-            onSelectComponent={(name) =>
-              dispatch({ type: 'SET_SELECTED_COMPONENT', component: name })
-            }
-            theme={state.previewTheme}
-            hasFilters={hasFilters}
-            searchQuery={state.searchQuery}
-            selectedCategory={state.selectedCategory}
-            selectedPlatform={state.selectedPlatform}
-            onClearFilters={() => dispatch({ type: 'RESET_FILTERS' })}
-          />
-        </div>
+      {/* Module Content */}
+      <main className="flex-1 overflow-hidden">
+        {renderModuleContent()}
       </main>
-
-      {/* Detail Panel - shown when a component is selected */}
-      {selectedComponentDef && (
-        <DetailPanel
-          component={selectedComponentDef}
-          selectedTab={state.selectedTab}
-          previewTheme={state.previewTheme}
-          previewSize={state.previewSize}
-          onTabChange={(tab) => dispatch({ type: 'SET_SELECTED_TAB', tab })}
-          onClose={handleCloseDetail}
-          onOpenInEditor={handleOpenInEditor}
-          onFullscreen={handleOpenFullscreen}
-          onVersionChange={handleVersionChange}
-        />
-      )}
-
-      {/* Fullscreen Preview Modal */}
-      {selectedComponentDef && (
-        <FullscreenPreview
-          component={selectedComponentDef}
-          isOpen={state.isFullscreenOpen}
-          onClose={handleCloseFullscreen}
-          initialTheme={state.previewTheme}
-          initialSize={state.previewSize}
-        />
-      )}
     </div>
   );
 }

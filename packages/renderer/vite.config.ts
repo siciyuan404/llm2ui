@@ -38,8 +38,6 @@ export default defineConfig({
       include: [
         resolve(packageDir, 'src/**/*.ts'),
         resolve(packageDir, 'src/**/*.tsx'),
-        resolve(rootDir, 'src/sdk/**/*.ts'),
-        resolve(rootDir, 'src/sdk/**/*.tsx'),
         resolve(rootDir, 'src/lib/**/*.ts'),
         resolve(rootDir, 'src/lib/**/*.tsx'),
         resolve(rootDir, 'src/types/**/*.ts'),

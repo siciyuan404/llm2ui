@@ -8,8 +8,8 @@
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { NetworkErrorState } from '@/lib/error-handling';
-import { getNetworkErrorMessage } from '@/lib/error-handling';
+import type { NetworkErrorState } from '@/lib';
+import { getNetworkErrorMessage } from '@/lib';
 
 // ============================================================================
 // Types

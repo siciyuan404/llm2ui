@@ -15,8 +15,8 @@
 
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import type { ComponentDefinition, PropSchema, ComponentRegistry } from '@/lib/component-registry';
-import { defaultRegistry } from '@/lib/component-registry';
+import type { ComponentDefinition, PropSchema, ComponentRegistry } from '@/lib';
+import { defaultRegistry } from '@/lib';
 import { VersionSelector } from './VersionSelector';
 import { UpgradeAlert } from './UpgradeAlert';
 
