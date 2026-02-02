@@ -17,6 +17,7 @@ import type {
   AppActions,
   ThemePreferences,
   PersistedContextSettings,
+  DevModeStatus,
 } from '@/types/state.types';
 import { STORAGE_KEYS } from '@/constants/storage-keys';
 import { DEFAULT_EDITOR_SPLIT_PERCENT } from '@/constants/defaults';
@@ -108,6 +109,9 @@ export const useAppStore = create<AppState & AppActions>()(
       // 主题状态
       themePreferences: defaultThemePreferences,
       contextSettings: defaultContextSettings,
+      
+      // 开发者模式状态
+      devMode: 'off' as DevModeStatus,
 
       // ========================================
       // Schema 操作
@@ -270,6 +274,19 @@ export const useAppStore = create<AppState & AppActions>()(
             ...settings,
           },
         });
+      },
+
+      // ========================================
+      // 开发者模式操作
+      // ========================================
+      
+      setDevMode: (mode: DevModeStatus) => {
+        set({ devMode: mode });
+      },
+
+      toggleDevMode: () => {
+        const { devMode } = get();
+        set({ devMode: devMode === 'on' ? 'off' : 'on' });
       },
     }),
     {

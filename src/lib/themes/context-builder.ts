@@ -11,7 +11,6 @@ import type {
   TokenEstimate,
   ContextBuildResult,
   ThemePack,
-  COMPONENT_PRESETS,
 } from './types';
 import { DEFAULT_CONTEXT_SETTINGS } from './types';
 
@@ -60,32 +59,30 @@ function estimateTokens(text: string, language: 'zh' | 'en' = 'zh'): number {
  */
 function getComponentDocs(
   theme: ThemePack,
-  settings: ContextSettings,
-  language: 'zh' | 'en'
+  settings: ContextSettings
 ): string {
   const registry = theme.components.registry;
   let componentIds: string[] = [];
 
   switch (settings.components.mode) {
     case 'all':
-      componentIds = registry.getAllComponentIds();
+      componentIds = registry?.getAll().map(c => c.name) ?? [];
       break;
     case 'selected':
       componentIds = settings.components.selectedIds ?? [];
       break;
     case 'preset':
       // 从预设获取组件 ID
-      const presetName = settings.components.presetName ?? 'all';
       // 简化处理，实际应从 COMPONENT_PRESETS 获取
-      componentIds = registry.getAllComponentIds();
+      componentIds = registry?.getAll().map(c => c.name) ?? [];
       break;
   }
 
   // 生成组件文档
   const docs = componentIds.map((id) => {
-    const component = registry.getComponent(id);
+    const component = registry?.get(id);
     if (!component) return '';
-    return `- ${component.type}: ${component.description || ''}`;
+    return `- ${component.name}: ${component.description || ''}`;
   }).filter(Boolean);
 
   return docs.join('\n');
@@ -184,7 +181,7 @@ export class ContextBuilder {
       };
     }
 
-    const componentDocs = getComponentDocs(theme, settings, this.language);
+    const componentDocs = getComponentDocs(theme, settings);
     const exampleDocs = getExampleDocs(theme, settings);
     const colorInfo = getColorInfo(theme, settings);
 
@@ -223,7 +220,7 @@ export class ContextBuilder {
     const templates = theme.prompts.templates[this.language];
 
     // 构建各部分内容
-    const componentDocs = getComponentDocs(theme, settings, this.language);
+    const componentDocs = getComponentDocs(theme, settings);
     const exampleDocs = getExampleDocs(theme, settings);
     const colorInfo = getColorInfo(theme, settings);
 

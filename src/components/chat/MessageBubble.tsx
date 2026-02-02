@@ -275,6 +275,62 @@ function formatTimestamp(timestamp: number): string {
 }
 
 // ============================================================================
+
+
+function CopyIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn('w-4 h-4', className)}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2-2v8a2 2 0 002-2z"
+      />
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn('w-3.5 h-3.5', className)}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M5 13l4 4L19 7"
+      />
+    </svg>
+  );
+}
+
+function LoadingSpinner({ className }: { className?: string }) {
+  return (
+    <svg
+      className={cn('w-4 h-4 animate-spin', className)}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357 2m15.357 2H15"
+      />
+    </svg>
+  );
+}
+
 // Main Components
 // ============================================================================
 
@@ -305,17 +361,6 @@ export function LoadingIndicator({ className }: LoadingIndicatorProps) {
   );
 }
 
-/**
- * Streaming indicator shown inline during message streaming
- */
-function StreamingCursor() {
-  return (
-    <span 
-      className="inline-block w-2 h-4 ml-1 bg-current animate-pulse" 
-      aria-label="正在输入..."
-    />
-  );
-}
 
 /**
  * Message bubble component for displaying chat messages
@@ -330,6 +375,18 @@ export function MessageBubble({
   onEvent,
   data,
 }: MessageBubbleProps) {
+    const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = React.useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  }, [message.content]);
+
   const isUser = message.role === 'user';
   const isAssistant = message.role === 'assistant';
   const isStreaming = message.status === 'streaming';
@@ -380,35 +437,43 @@ export function MessageBubble({
       >
         {/* Message content */}
         <div className={cn('text-sm', hasUISchema && 'space-y-3')}>
-          {contentParts.map((part, index) => (
-            <React.Fragment key={index}>
-              {part.type === 'uischema' && part.schema ? (
-                <RenderedUICard
-                  schema={part.schema}
-                  data={data}
-                  onCopyJson={() => handleCopyJson(part.schema!)}
-                  onApplyToEditor={onApplyToEditor ? () => handleApplyToEditor(part.schema!) : undefined}
-                  onEvent={onEvent}
-                  className="my-2"
-                />
-              ) : part.type === 'json' ? (
-                <div className={cn(
-                  !hasUISchema && 'my-2',
-                  hasUISchema && 'bg-muted rounded-lg px-4 py-2'
-                )}>
-                  <JsonHighlight content={part.content} />
-                </div>
-              ) : (
-                <span className={cn(
-                  'whitespace-pre-wrap break-words',
-                  hasUISchema && 'bg-muted rounded-lg px-4 py-2 block'
-                )}>
-                  {part.content}
-                </span>
-              )}
-            </React.Fragment>
-          ))}
-          {isStreaming && <StreamingCursor />}
+          {isStreaming && !isUser ? (
+            <div className="flex items-center gap-2 text-sm">
+              <LoadingSpinner />
+              <span className="text-muted-foreground">正在生成回复...</span>
+            </div>
+          ) : (
+            <>
+              {contentParts.map((part, index) => (
+                <React.Fragment key={index}>
+                  {part.type === 'uischema' && part.schema ? (
+                    <RenderedUICard
+                      schema={part.schema}
+                      data={data}
+                      onCopyJson={() => handleCopyJson(part.schema!)}
+                      onApplyToEditor={onApplyToEditor ? () => handleApplyToEditor(part.schema!) : undefined}
+                      onEvent={onEvent}
+                      className="my-2"
+                    />
+                  ) : part.type === 'json' ? (
+                    <div className={cn(
+                      !hasUISchema && 'my-2',
+                      hasUISchema && 'bg-muted rounded-lg px-4 py-2'
+                    )}>
+                      <JsonHighlight content={part.content} />
+                    </div>
+                  ) : (
+                    <span className={cn(
+                      'whitespace-pre-wrap break-words',
+                      hasUISchema && 'bg-muted rounded-lg px-4 py-2 block'
+                    )}>
+                      {part.content}
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
+            </>
+          )}
         </div>
 
         {/* Error message */}
@@ -432,21 +497,25 @@ export function MessageBubble({
         )}
 
         {/* Timestamp - only show for non-UI Schema messages or at the end */}
-        {!hasUISchema && (
-          <div
-            className={cn(
-              'mt-1 text-xs',
-              isUser ? 'text-primary-foreground/70' : 'text-muted-foreground'
-            )}
-          >
-            {formatTimestamp(message.timestamp)}
-          </div>
-        )}
-        {hasUISchema && (
-          <div className="text-xs text-muted-foreground mt-2">
-            {formatTimestamp(message.timestamp)}
-          </div>
-        )}
+        <div className={cn(
+          'flex items-center gap-2 text-xs text-muted-foreground mt-2',
+          isUser ? 'justify-end' : 'justify-start'
+        )}>
+          <span>{formatTimestamp(message.timestamp)}</span>
+          {!isStreaming && (
+            <button
+              onClick={handleCopy}
+              className={cn(
+                'flex items-center gap-1 px-2 py-1 rounded hover:bg-muted-foreground/10 transition-colors',
+                copied && 'text-green-600 dark:text-green-400'
+              )}
+              title={copied ? '已复制' : '复制'}
+            >
+              {copied ? <CheckIcon /> : <CopyIcon />}
+              {copied ? '已复制' : '复制'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -61,6 +61,20 @@ import { Separator } from '../../components/ui/separator';
 // v4 新增组件
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia } from '../../components/ui/empty';
 import { Spinner } from '../../components/ui/spinner';
+import { ButtonGroup } from '../../components/ui/button-group';
+import { Kbd, KbdGroup } from '../../components/ui/kbd';
+import { Field, FieldLabel, FieldDescription, FieldError, FieldGroup, FieldSet, FieldLegend, FieldSeparator, FieldContent } from '../../components/ui/field';
+import { InputGroup, InputGroupInput, InputGroupAddon, InputGroupText, InputGroupButton, InputGroupTextarea } from '../../components/ui/input-group';
+import { Item, ItemHeader, ItemTitle, ItemDescription, ItemContent, ItemMedia, ItemAction, ItemFooter } from '../../components/ui/item';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '../../components/ui/input-otp';
+import { NativeSelect, NativeSelectItem, NativeSelectGroup, NativeSelectLabel } from '../../components/ui/native-select';
+import { TypographyH1, TypographyH2, TypographyH3, TypographyH4, TypographyP, TypographyLead, TypographyMuted, TypographySmall, TypographyLarge, TypographyBlockquote } from '../../components/ui/typography';
+
+// Settings Form Components (设置表单组件)
+import { SettingsSection, SettingsSectionGroup } from '../../components/ui/settings-section';
+import { SettingRow, SettingRowGroup } from '../../components/ui/setting-row';
+import { SettingsPanel, SettingsPanelFooter } from '../../components/ui/settings-panel';
+import { SwitchField, SelectField, SliderField, InputField } from '../../components/ui/setting-controls';
 
 // Layout
 import { AspectRatio } from '../../components/ui/aspect-ratio';
@@ -68,6 +82,11 @@ import { ScrollArea, ScrollBar } from '../../components/ui/scroll-area';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '../../components/ui/collapsible';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../../components/ui/accordion';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../../components/ui/resizable';
+import {
+  Sidebar, SidebarHeader, SidebarFooter, SidebarContent, SidebarGroup, SidebarGroupLabel,
+  SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger,
+  AppSidebar, AppSidebarLogo, AppSidebarMenus, AppSidebarBottomMenus, AppSidebarIconButton,
+} from '../../components/ui/sidebar';
 
 // Navigation
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/tabs';
@@ -115,6 +134,7 @@ import {
 } from '../../components/ui/drawer';
 import { Popover, PopoverTrigger, PopoverContent } from '../../components/ui/popover';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '../../components/ui/tooltip';
+import { Bubble, BubbleContent, BubbleProgressTrigger } from '../../components/ui/bubble';
 import { HoverCard, HoverCardTrigger, HoverCardContent } from '../../components/ui/hover-card';
 import {
   Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem, CommandSeparator,
@@ -384,6 +404,59 @@ export function registerShadcnComponents(registry: ComponentRegistry = defaultRe
   registry.register({ name: 'ResizablePanel', component: ResizablePanel, category: 'layout' as ComponentCategory, description: '可调整大小面板', propsSchema: { ...commonProps, defaultSize: { type: 'number', required: false, description: '默认大小' }, minSize: { type: 'number', required: false, description: '最小大小' }, maxSize: { type: 'number', required: false, description: '最大大小' } } });
   registry.register({ name: 'ResizableHandle', component: ResizableHandle, category: 'layout' as ComponentCategory, description: '调整大小手柄', propsSchema: { ...commonProps, withHandle: { type: 'boolean', required: false, description: '显示手柄' } } });
 
+  // Sidebar 组件
+  registry.register({ name: 'Sidebar', component: Sidebar, category: 'navigation' as ComponentCategory, description: '侧边栏容器组件', propsSchema: commonProps });
+  registry.register({ name: 'SidebarHeader', component: SidebarHeader, category: 'navigation' as ComponentCategory, description: '侧边栏头部', propsSchema: commonProps });
+  registry.register({ name: 'SidebarFooter', component: SidebarFooter, category: 'navigation' as ComponentCategory, description: '侧边栏底部', propsSchema: commonProps });
+  registry.register({ name: 'SidebarContent', component: SidebarContent, category: 'navigation' as ComponentCategory, description: '侧边栏内容区', propsSchema: commonProps });
+  registry.register({ name: 'SidebarGroup', component: SidebarGroup, category: 'navigation' as ComponentCategory, description: '侧边栏分组', propsSchema: commonProps });
+  registry.register({ name: 'SidebarGroupLabel', component: SidebarGroupLabel, category: 'navigation' as ComponentCategory, description: '侧边栏分组标签', propsSchema: commonProps });
+  registry.register({ name: 'SidebarGroupContent', component: SidebarGroupContent, category: 'navigation' as ComponentCategory, description: '侧边栏分组内容', propsSchema: commonProps });
+  registry.register({ name: 'SidebarMenu', component: SidebarMenu, category: 'navigation' as ComponentCategory, description: '侧边栏菜单', propsSchema: commonProps });
+  registry.register({ name: 'SidebarMenuItem', component: SidebarMenuItem, category: 'navigation' as ComponentCategory, description: '侧边栏菜单项', propsSchema: commonProps });
+  registry.register({ name: 'SidebarMenuButton', component: SidebarMenuButton, category: 'navigation' as ComponentCategory, description: '侧边栏菜单按钮', propsSchema: commonProps });
+  registry.register({ name: 'SidebarTrigger', component: SidebarTrigger, category: 'navigation' as ComponentCategory, description: '侧边栏触发器', propsSchema: commonProps });
+
+  // AppSidebar 组件 - 图标导航栏风格
+  registry.register({
+    name: 'AppSidebar',
+    component: AppSidebar,
+    category: 'navigation' as ComponentCategory,
+    description: '应用侧边栏容器，垂直图标导航栏风格，类似 cherry-studio',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'AppSidebarLogo',
+    component: AppSidebarLogo,
+    category: 'navigation' as ComponentCategory,
+    description: '应用侧边栏 Logo 容器',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'AppSidebarMenus',
+    component: AppSidebarMenus,
+    category: 'navigation' as ComponentCategory,
+    description: '应用侧边栏主菜单容器',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'AppSidebarBottomMenus',
+    component: AppSidebarBottomMenus,
+    category: 'navigation' as ComponentCategory,
+    description: '应用侧边栏底部菜单容器',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'AppSidebarIconButton',
+    component: AppSidebarIconButton,
+    category: 'navigation' as ComponentCategory,
+    description: '应用侧边栏图标按钮，支持 active 状态',
+    propsSchema: {
+      ...commonProps,
+      active: { type: 'boolean', required: false, description: '是否为激活状态' },
+    },
+  });
+
   // ==========================================================================
   // 导航组件 (Navigation)
   // ==========================================================================
@@ -570,6 +643,491 @@ export function registerShadcnComponents(registry: ComponentRegistry = defaultRe
   });
 
   // ==========================================================================
+  // v4 新增组件 (ButtonGroup, Kbd, Field, InputGroup, Item, InputOTP, NativeSelect, Typography)
+  // ==========================================================================
+
+  // ButtonGroup
+  registry.register({
+    name: 'ButtonGroup',
+    component: ButtonGroup,
+    category: 'input' as ComponentCategory,
+    description: '按钮组组件，用于组织相关按钮',
+    propsSchema: commonProps,
+  });
+
+  // Kbd
+  registry.register({
+    name: 'Kbd',
+    component: Kbd,
+    category: 'display' as ComponentCategory,
+    description: '键盘快捷键显示组件',
+    propsSchema: {
+      ...commonProps,
+      variant: { type: 'string', required: false, description: '样式变体', enum: ['default', 'outline'] },
+    },
+  });
+  registry.register({
+    name: 'KbdGroup',
+    component: KbdGroup,
+    category: 'display' as ComponentCategory,
+    description: '键盘快捷键组',
+    propsSchema: commonProps,
+  });
+
+  // Field
+  registry.register({
+    name: 'Field',
+    component: Field,
+    category: 'input' as ComponentCategory,
+    description: '表单字段组件',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'FieldLabel',
+    component: FieldLabel,
+    category: 'input' as ComponentCategory,
+    description: '表单字段标签',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'FieldDescription',
+    component: FieldDescription,
+    category: 'input' as ComponentCategory,
+    description: '表单字段描述',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'FieldError',
+    component: FieldError,
+    category: 'input' as ComponentCategory,
+    description: '表单字段错误提示',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'FieldGroup',
+    component: FieldGroup,
+    category: 'input' as ComponentCategory,
+    description: '表单字段组',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'FieldSet',
+    component: FieldSet,
+    category: 'input' as ComponentCategory,
+    description: '表单字段集',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'FieldLegend',
+    component: FieldLegend,
+    category: 'input' as ComponentCategory,
+    description: '表单字段集标题',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'FieldSeparator',
+    component: FieldSeparator,
+    category: 'input' as ComponentCategory,
+    description: '表单字段分隔符',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'FieldContent',
+    component: FieldContent,
+    category: 'input' as ComponentCategory,
+    description: '表单字段内容',
+    propsSchema: commonProps,
+  });
+
+  // InputGroup
+  registry.register({
+    name: 'InputGroup',
+    component: InputGroup,
+    category: 'input' as ComponentCategory,
+    description: '输入组组件',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'InputGroupInput',
+    component: InputGroupInput,
+    category: 'input' as ComponentCategory,
+    description: '输入组输入框',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'InputGroupAddon',
+    component: InputGroupAddon,
+    category: 'input' as ComponentCategory,
+    description: '输入组附加元素',
+    propsSchema: {
+      ...commonProps,
+      align: { type: 'string', required: false, description: '对齐方式', enum: ['inline-start', 'inline-end', 'block-start', 'block-end'] },
+    },
+  });
+  registry.register({
+    name: 'InputGroupText',
+    component: InputGroupText,
+    category: 'input' as ComponentCategory,
+    description: '输入组文本',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'InputGroupButton',
+    component: InputGroupButton,
+    category: 'input' as ComponentCategory,
+    description: '输入组按钮',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'InputGroupTextarea',
+    component: InputGroupTextarea,
+    category: 'input' as ComponentCategory,
+    description: '输入组文本域',
+    propsSchema: commonProps,
+  });
+
+  // Item
+  registry.register({
+    name: 'Item',
+    component: Item,
+    category: 'display' as ComponentCategory,
+    description: '列表项组件',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'ItemHeader',
+    component: ItemHeader,
+    category: 'display' as ComponentCategory,
+    description: '列表项头部',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'ItemTitle',
+    component: ItemTitle,
+    category: 'display' as ComponentCategory,
+    description: '列表项标题',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'ItemDescription',
+    component: ItemDescription,
+    category: 'display' as ComponentCategory,
+    description: '列表项描述',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'ItemContent',
+    component: ItemContent,
+    category: 'display' as ComponentCategory,
+    description: '列表项内容',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'ItemMedia',
+    component: ItemMedia,
+    category: 'display' as ComponentCategory,
+    description: '列表项媒体/缩略图',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'ItemAction',
+    component: ItemAction,
+    category: 'display' as ComponentCategory,
+    description: '列表项操作区',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'ItemFooter',
+    component: ItemFooter,
+    category: 'display' as ComponentCategory,
+    description: '列表项底部',
+    propsSchema: commonProps,
+  });
+
+  // InputOTP
+  registry.register({
+    name: 'InputOTP',
+    component: InputOTP,
+    category: 'input' as ComponentCategory,
+    description: 'OTP 输入组件',
+    propsSchema: {
+      ...commonProps,
+      maxLength: { type: 'number', required: false, description: '最大长度' },
+    },
+  });
+  registry.register({
+    name: 'InputOTPGroup',
+    component: InputOTPGroup,
+    category: 'input' as ComponentCategory,
+    description: 'OTP 输入组',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'InputOTPSlot',
+    component: InputOTPSlot,
+    category: 'input' as ComponentCategory,
+    description: 'OTP 输入槽',
+    propsSchema: {
+      ...commonProps,
+      index: { type: 'number', required: true, description: '索引' },
+    },
+  });
+
+  // NativeSelect
+  registry.register({
+    name: 'NativeSelect',
+    component: NativeSelect,
+    category: 'input' as ComponentCategory,
+    description: '原生选择组件',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'NativeSelectItem',
+    component: NativeSelectItem,
+    category: 'input' as ComponentCategory,
+    description: '原生选择项',
+    propsSchema: {
+      ...commonProps,
+      value: { type: 'string', required: true, description: '选项值' },
+    },
+  });
+  registry.register({
+    name: 'NativeSelectGroup',
+    component: NativeSelectGroup,
+    category: 'input' as ComponentCategory,
+    description: '原生选择分组',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'NativeSelectLabel',
+    component: NativeSelectLabel,
+    category: 'input' as ComponentCategory,
+    description: '原生选择标签',
+    propsSchema: commonProps,
+  });
+
+  // Typography
+  registry.register({
+    name: 'TypographyH1',
+    component: TypographyH1,
+    category: 'display' as ComponentCategory,
+    description: 'H1 标题',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographyH2',
+    component: TypographyH2,
+    category: 'display' as ComponentCategory,
+    description: 'H2 标题',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographyH3',
+    component: TypographyH3,
+    category: 'display' as ComponentCategory,
+    description: 'H3 标题',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographyH4',
+    component: TypographyH4,
+    category: 'display' as ComponentCategory,
+    description: 'H4 标题',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographyP',
+    component: TypographyP,
+    category: 'display' as ComponentCategory,
+    description: '段落文本',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographyLead',
+    component: TypographyLead,
+    category: 'display' as ComponentCategory,
+    description: '引导文本',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographyMuted',
+    component: TypographyMuted,
+    category: 'display' as ComponentCategory,
+    description: '静音文本',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographySmall',
+    component: TypographySmall,
+    category: 'display' as ComponentCategory,
+    description: '小号文本',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographyLarge',
+    component: TypographyLarge,
+    category: 'display' as ComponentCategory,
+    description: '大号文本',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'TypographyBlockquote',
+    component: TypographyBlockquote,
+    category: 'display' as ComponentCategory,
+    description: '引用文本',
+    propsSchema: commonProps,
+  });
+
+  // ==========================================================================
+  // 设置表单组件 (Settings Form Components)
+  // ==========================================================================
+
+  // SettingsPanel - 设置面板容器
+  registry.register({
+    name: 'SettingsPanel',
+    component: SettingsPanel,
+    category: 'layout' as ComponentCategory,
+    description: '设置面板容器组件，包含标题栏、滚动区域和关闭按钮',
+    propsSchema: {
+      ...commonProps,
+      title: { type: 'string', required: false, description: '面板标题' },
+      width: { type: 'number', required: false, description: '面板宽度' },
+      showCloseButton: { type: 'boolean', required: false, description: '是否显示关闭按钮' },
+    },
+  });
+
+  registry.register({
+    name: 'SettingsPanelFooter',
+    component: SettingsPanelFooter,
+    category: 'layout' as ComponentCategory,
+    description: '设置面板底部区域',
+    propsSchema: commonProps,
+  });
+
+  // SettingsSection - 可折叠设置分组
+  registry.register({
+    name: 'SettingsSection',
+    component: SettingsSection,
+    category: 'layout' as ComponentCategory,
+    description: '可折叠的设置分组组件，支持展开/折叠状态',
+    propsSchema: {
+      ...commonProps,
+      title: { type: 'string', required: true, description: '分组标题' },
+      defaultOpen: { type: 'boolean', required: false, description: '默认是否展开' },
+      open: { type: 'boolean', required: false, description: '受控模式：是否展开' },
+    },
+  });
+
+  registry.register({
+    name: 'SettingsSectionGroup',
+    component: SettingsSectionGroup,
+    category: 'layout' as ComponentCategory,
+    description: '设置分组容器，自动添加分隔线',
+    propsSchema: {
+      ...commonProps,
+      showSeparator: { type: 'boolean', required: false, description: '是否显示分隔线' },
+    },
+  });
+
+  // SettingRow - 设置行
+  registry.register({
+    name: 'SettingRow',
+    component: SettingRow,
+    category: 'input' as ComponentCategory,
+    description: '设置行组件，标签 + 控件的水平布局',
+    propsSchema: {
+      ...commonProps,
+      label: { type: 'string', required: true, description: '标签文本' },
+      helpText: { type: 'string', required: false, description: '帮助提示文本' },
+      description: { type: 'string', required: false, description: '描述文本' },
+      disabled: { type: 'boolean', required: false, description: '是否禁用' },
+    },
+  });
+
+  registry.register({
+    name: 'SettingRowGroup',
+    component: SettingRowGroup,
+    category: 'input' as ComponentCategory,
+    description: '设置行组容器',
+    propsSchema: commonProps,
+  });
+
+  // SwitchField - 开关表单控件
+  registry.register({
+    name: 'SwitchField',
+    component: SwitchField,
+    category: 'input' as ComponentCategory,
+    description: '开关表单控件，结合标签和开关',
+    propsSchema: {
+      ...commonProps,
+      label: { type: 'string', required: true, description: '标签文本' },
+      helpText: { type: 'string', required: false, description: '帮助提示文本' },
+      description: { type: 'string', required: false, description: '描述文本' },
+      checked: { type: 'boolean', required: false, description: '是否选中' },
+      defaultChecked: { type: 'boolean', required: false, description: '默认是否选中' },
+      disabled: { type: 'boolean', required: false, description: '是否禁用' },
+    },
+  });
+
+  // SelectField - 下拉选择表单控件
+  registry.register({
+    name: 'SelectField',
+    component: SelectField,
+    category: 'input' as ComponentCategory,
+    description: '下拉选择表单控件，结合标签和下拉选择',
+    propsSchema: {
+      ...commonProps,
+      label: { type: 'string', required: true, description: '标签文本' },
+      helpText: { type: 'string', required: false, description: '帮助提示文本' },
+      options: { type: 'array', required: true, description: '选项列表 [{value, label}]' },
+      value: { type: 'string', required: false, description: '当前值' },
+      defaultValue: { type: 'string', required: false, description: '默认值' },
+      placeholder: { type: 'string', required: false, description: '占位符' },
+      selectWidth: { type: 'string', required: false, description: '选择器宽度' },
+      disabled: { type: 'boolean', required: false, description: '是否禁用' },
+    },
+  });
+
+  // SliderField - 滑块表单控件
+  registry.register({
+    name: 'SliderField',
+    component: SliderField,
+    category: 'input' as ComponentCategory,
+    description: '滑块表单控件，带标签和值显示',
+    propsSchema: {
+      ...commonProps,
+      label: { type: 'string', required: true, description: '标签文本' },
+      value: { type: 'array', required: false, description: '当前值' },
+      defaultValue: { type: 'array', required: false, description: '默认值' },
+      min: { type: 'number', required: false, description: '最小值' },
+      max: { type: 'number', required: false, description: '最大值' },
+      step: { type: 'number', required: false, description: '步长' },
+      showValue: { type: 'boolean', required: false, description: '是否显示当前值' },
+      showRangeLabels: { type: 'boolean', required: false, description: '是否显示范围标签' },
+      disabled: { type: 'boolean', required: false, description: '是否禁用' },
+    },
+  });
+
+  // InputField - 输入框表单控件
+  registry.register({
+    name: 'InputField',
+    component: InputField,
+    category: 'input' as ComponentCategory,
+    description: '输入框表单控件，结合标签和输入框',
+    propsSchema: {
+      ...commonProps,
+      label: { type: 'string', required: true, description: '标签文本' },
+      helpText: { type: 'string', required: false, description: '帮助提示文本' },
+      value: { type: 'string', required: false, description: '当前值' },
+      defaultValue: { type: 'string', required: false, description: '默认值' },
+      placeholder: { type: 'string', required: false, description: '占位符' },
+      type: { type: 'string', required: false, description: '输入类型', enum: ['text', 'number', 'password', 'email'] },
+      inputWidth: { type: 'string', required: false, description: '输入框宽度' },
+      disabled: { type: 'boolean', required: false, description: '是否禁用' },
+    },
+  });
+
+  // ==========================================================================
   // 基础包装组件 (Text, Container, Icon)
   // ==========================================================================
 
@@ -639,6 +1197,43 @@ export function registerShadcnComponents(registry: ComponentRegistry = defaultRe
   });
 
   // ==========================================================================
+  // Bubble 组件
+  // ==========================================================================
+
+  registry.register({
+    name: 'Bubble',
+    component: Bubble,
+    category: 'feedback' as ComponentCategory,
+    description: '泡泡弹出组件，包含圆形进度条触发器和弹出内容',
+    propsSchema: commonProps,
+  });
+  registry.register({
+    name: 'BubbleContent',
+    component: BubbleContent,
+    category: 'feedback' as ComponentCategory,
+    description: '泡泡内容容器',
+    propsSchema: {
+      ...commonProps,
+      align: { type: 'string', required: false, description: '对齐方式', enum: ['start', 'center', 'end'] },
+      side: { type: 'string', required: false, description: '位置', enum: ['top', 'right', 'bottom', 'left'] },
+    },
+  });
+  registry.register({
+    name: 'BubbleProgressTrigger',
+    component: BubbleProgressTrigger,
+    category: 'feedback' as ComponentCategory,
+    description: '带圆形进度条的泡泡触发器',
+    propsSchema: {
+      ...commonProps,
+      progress: { type: 'number', required: false, description: '进度值 (0-100)' },
+      size: { type: 'number', required: false, description: '尺寸' },
+      strokeWidth: { type: 'number', required: false, description: '进度条宽度' },
+      color: { type: 'string', required: false, description: '进度条颜色' },
+      backgroundColor: { type: 'string', required: false, description: '背景颜色' },
+    },
+  });
+
+  // ==========================================================================
   // 小写别名 (Lowercase Aliases for LLM compatibility)
   // ==========================================================================
 
@@ -651,6 +1246,23 @@ export function registerShadcnComponents(registry: ComponentRegistry = defaultRe
     { name: 'alert', original: 'Alert' }, { name: 'dialog', original: 'Dialog' }, { name: 'popover', original: 'Popover' },
     { name: 'tooltip', original: 'Tooltip' }, { name: 'text', original: 'Text' }, { name: 'container', original: 'Container' },
     { name: 'icon', original: 'Icon' }, { name: 'empty', original: 'Empty' }, { name: 'spinner', original: 'Spinner' },
+    { name: 'bubble', original: 'Bubble' }, { name: 'bubble-content', original: 'BubbleContent' }, { name: 'bubble-progress-trigger', original: 'BubbleProgressTrigger' },
+    // v4 新增组件小写别名
+    { name: 'button-group', original: 'ButtonGroup' }, { name: 'kbd', original: 'Kbd' }, { name: 'kbd-group', original: 'KbdGroup' },
+    { name: 'field', original: 'Field' }, { name: 'field-label', original: 'FieldLabel' }, { name: 'field-description', original: 'FieldDescription' },
+    { name: 'field-error', original: 'FieldError' }, { name: 'field-group', original: 'FieldGroup' }, { name: 'fieldset', original: 'FieldSet' },
+    { name: 'field-legend', original: 'FieldLegend' }, { name: 'field-separator', original: 'FieldSeparator' }, { name: 'field-content', original: 'FieldContent' },
+    { name: 'input-group', original: 'InputGroup' }, { name: 'input-group-input', original: 'InputGroupInput' }, { name: 'input-group-addon', original: 'InputGroupAddon' },
+    { name: 'input-group-text', original: 'InputGroupText' }, { name: 'input-group-button', original: 'InputGroupButton' }, { name: 'input-group-textarea', original: 'InputGroupTextarea' },
+    { name: 'item', original: 'Item' }, { name: 'item-header', original: 'ItemHeader' }, { name: 'item-title', original: 'ItemTitle' },
+    { name: 'item-description', original: 'ItemDescription' }, { name: 'item-content', original: 'ItemContent' }, { name: 'item-media', original: 'ItemMedia' },
+    { name: 'item-action', original: 'ItemAction' }, { name: 'item-footer', original: 'ItemFooter' }, { name: 'input-otp', original: 'InputOTP' }, { name: 'input-otp-group', original: 'InputOTPGroup' },
+    { name: 'input-otp-slot', original: 'InputOTPSlot' }, { name: 'native-select', original: 'NativeSelect' }, { name: 'native-select-item', original: 'NativeSelectItem' },
+    { name: 'native-select-group', original: 'NativeSelectGroup' }, { name: 'native-select-label', original: 'NativeSelectLabel' },
+    { name: 'typography-h1', original: 'TypographyH1' }, { name: 'typography-h2', original: 'TypographyH2' }, { name: 'typography-h3', original: 'TypographyH3' },
+    { name: 'typography-h4', original: 'TypographyH4' }, { name: 'typography-p', original: 'TypographyP' }, { name: 'typography-lead', original: 'TypographyLead' },
+    { name: 'typography-muted', original: 'TypographyMuted' }, { name: 'typography-small', original: 'TypographySmall' }, { name: 'typography-large', original: 'TypographyLarge' },
+    { name: 'typography-blockquote', original: 'TypographyBlockquote' },
     // 布局容器别名（LLM 常用）
     { name: 'Box', original: 'Container' }, { name: 'box', original: 'Container' },
     { name: 'Div', original: 'Container' }, { name: 'div', original: 'Container' },

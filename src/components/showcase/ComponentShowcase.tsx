@@ -1,14 +1,14 @@
 /**
  * ComponentShowcase - Main showcase page for design system documentation
- * 
+ *
  * Refactored as a design system documentation center with three main modules:
  * - Tokens: Design tokens (Icons, Typography, Colors, Spacing, Shadows, Border Radius)
  * - Components: Component library with documentation
  * - Examples: UI examples and patterns
- * 
+ *
  * Supports module switching via tabs and URL routing.
- * Now integrates with the multi-theme system to display theme-specific content.
- * 
+ * Now integrates with multi-theme system to display theme-specific content.
+ *
  * @module ComponentShowcase
  * @see Requirements 1.1, 2.1, 3.1, 5.1
  */
@@ -23,51 +23,25 @@ import { ExamplesModule } from './ExamplesModule';
 import { ThemeMarketplace } from './ThemeMarketplace';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { ScreenSizeSwitcher, parseScreenSizeFromUrl, type ScreenSize } from './ScreenSizeSwitcher';
+import { DevModeToggle } from '@/components/dev-mode';
 import { getThemeManager, type ThemePack } from '@/lib/themes';
 import type { UISchema } from '@/types';
 
-// ============================================================================
-// Types
-// ============================================================================
-
-/**
- * Showcase module type
- */
 export type ShowcaseModule = 'tokens' | 'components' | 'examples' | 'themes';
 
-/**
- * Showcase state management interface
- */
 export interface ShowcaseState {
-  /** Currently active module */
   activeModule: ShowcaseModule;
-  /** Currently selected item ID within the module */
   activeItemId: string | null;
-  /** Screen size for preview */
   screenSize: ScreenSize;
-  /** Theme (light or dark) */
   theme: 'light' | 'dark';
 }
 
-/**
- * Props for ComponentShowcase
- */
 export interface ComponentShowcaseProps {
-  /** Initial module to display */
   initialModule?: ShowcaseModule;
-  /** Callback when state changes */
   onStateChange?: (state: ShowcaseState) => void;
-  /** Additional class name */
   className?: string;
 }
 
-// ============================================================================
-// Constants
-// ============================================================================
-
-/**
- * Module tab configuration
- */
 const MODULE_TABS: { id: ShowcaseModule; label: string; icon: React.ReactNode }[] = [
   { id: 'tokens', label: 'Tokens', icon: <Palette className="w-4 h-4" /> },
   { id: 'components', label: 'Components', icon: <Package className="w-4 h-4" /> },
@@ -75,29 +49,16 @@ const MODULE_TABS: { id: ShowcaseModule; label: string; icon: React.ReactNode }[
   { id: 'themes', label: 'Themes', icon: <Paintbrush className="w-4 h-4" /> },
 ];
 
-/**
- * Default token category
- */
 const DEFAULT_TOKEN_CATEGORY: TokenCategory = 'icons';
 
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Parse module from URL path
- */
 function parseModuleFromPath(pathname: string): ShowcaseModule {
   if (pathname.includes('/showcase/tokens')) return 'tokens';
   if (pathname.includes('/showcase/components')) return 'components';
   if (pathname.includes('/showcase/examples')) return 'examples';
   if (pathname.includes('/showcase/themes')) return 'themes';
-  return 'tokens'; // Default to tokens
+  return 'tokens';
 }
 
-/**
- * Parse item ID from URL path
- */
 function parseItemIdFromPath(pathname: string, module: ShowcaseModule): string | null {
   const basePath = `/showcase/${module}/`;
   if (pathname.startsWith(basePath)) {
@@ -106,10 +67,6 @@ function parseItemIdFromPath(pathname: string, module: ShowcaseModule): string |
   }
   return null;
 }
-
-// ============================================================================
-// Icons
-// ============================================================================
 
 function SunIcon() {
   return (
@@ -127,13 +84,6 @@ function MoonIcon() {
   );
 }
 
-// ============================================================================
-// Sub-Components
-// ============================================================================
-
-/**
- * Header component with navigation and controls
- */
 function Header({
   activeModule,
   onModuleChange,
@@ -149,81 +99,94 @@ function Header({
   theme: 'light' | 'dark';
   onThemeToggle: () => void;
 }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
   return (
-    <header className="h-14 px-4 flex items-center justify-between border-b border-border bg-card">
-      {/* Left: Title and Back Link */}
-      <div className="flex items-center gap-4">
+    <header className="h-14 px-2 sm:px-4 flex items-center justify-between border-b border-border bg-card">
+      <div className="flex items-center gap-2 sm:gap-4">
         <Link
           to="/"
-          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="text-xs sm:text-sm text-muted-foreground hover:text-foreground transition-colors"
           title="返回主界面"
         >
           ← 返回
         </Link>
-        <div className="h-4 w-px bg-border" />
-        <h1 className="text-lg font-semibold">Design System</h1>
+        <div className="hidden sm:block h-4 w-px bg-border" />
+        <h1 className="text-base sm:text-lg font-semibold truncate">Design System</h1>
       </div>
 
-      {/* Center: Module Tabs */}
-      <nav className="flex items-center">
-        <div className="flex items-center bg-muted/50 rounded-lg p-1">
+      <nav className="flex items-center flex-1 px-2 sm:px-4">
+        <div className="flex items-center bg-muted/50 rounded-lg p-0.5 overflow-x-auto no-scrollbar max-w-full sm:max-w-fit">
           {MODULE_TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => onModuleChange(tab.id)}
               className={cn(
-                'flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors',
+                'flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap flex-shrink-0',
                 activeModule === tab.id
                   ? 'bg-background text-foreground shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
-              <span>{tab.icon}</span>
+              <span className="w-3.5 h-3.5 sm:w-4 sm:h-4">{tab.icon}</span>
               <span>{tab.label}</span>
             </button>
           ))}
         </div>
       </nav>
 
-      {/* Right: Controls */}
-      <div className="flex items-center gap-2">
-        {/* Theme Switcher */}
+      <div className="flex items-center gap-1 sm:gap-2">
+        <div className="hidden sm:block">
+          <DevModeToggle showLabel={false} />
+        </div>
         <ThemeSwitcher size="sm" />
-
-        {/* Screen Size Switcher */}
-        <ScreenSizeSwitcher
-          value={screenSize}
-          onChange={onScreenSizeChange}
-          syncWithUrl={true}
-        />
-
-        {/* Theme Toggle */}
+        <div className="hidden sm:block">
+          <ScreenSizeSwitcher
+            value={screenSize}
+            onChange={onScreenSizeChange}
+            syncWithUrl={true}
+          />
+        </div>
         <button
           onClick={onThemeToggle}
-          className="px-3 py-1.5 text-sm border border-border rounded-md hover:bg-muted transition-colors"
+          className="px-2 sm:px-3 py-1.5 text-xs sm:text-sm border border-border rounded-md hover:bg-muted transition-colors"
           title={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
         >
           {theme === 'light' ? <MoonIcon /> : <SunIcon />}
         </button>
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="sm:hidden px-2 py-1.5 text-sm border border-border rounded-md hover:bg-muted transition-colors"
+          aria-label="更多选项"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
+
+      {isMobileMenuOpen && (
+        <div className="absolute top-14 right-0 left-0 bg-card border-b border-border sm:hidden z-50">
+          <div className="p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">开发模式</span>
+              <DevModeToggle showLabel={false} />
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">预览尺寸</span>
+              <ScreenSizeSwitcher
+                value={screenSize}
+                onChange={onScreenSizeChange}
+                syncWithUrl={true}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
 
-// ============================================================================
-// Main Component
-// ============================================================================
-
-/**
- * ComponentShowcase - Main showcase page component
- * 
- * Design system documentation center with three modules:
- * - Tokens: Design tokens display
- * - Components: Component library documentation
- * - Examples: UI examples and patterns
- * 
- * @see Requirements 1.1, 2.1, 3.1, 5.1
- */
 export function ComponentShowcase({
   initialModule,
   onStateChange,
@@ -233,12 +196,10 @@ export function ComponentShowcase({
   const location = useLocation();
   const [searchParams] = useSearchParams();
 
-  // Parse initial state from URL
   const initialScreenSize = React.useMemo(() => {
     return parseScreenSizeFromUrl(searchParams, 'size');
-  }, []); // Only compute once on mount
+  }, []);
 
-  // State management
   const [activeModule, setActiveModule] = React.useState<ShowcaseModule>(() => {
     if (initialModule) return initialModule;
     return parseModuleFromPath(location.pathname);
@@ -250,11 +211,8 @@ export function ComponentShowcase({
 
   const [screenSize, setScreenSize] = React.useState<ScreenSize>(initialScreenSize);
   const [theme, setTheme] = React.useState<'light' | 'dark'>('light');
-
-  // Token category state (for TokensModule)
   const [tokenCategory, setTokenCategory] = React.useState<TokenCategory>(DEFAULT_TOKEN_CATEGORY);
 
-  // Theme system integration - subscribe to theme changes
   const themeManager = React.useMemo(() => getThemeManager(), []);
   const [activeTheme, setActiveTheme] = React.useState<ThemePack | null>(() => {
     try {
@@ -264,7 +222,6 @@ export function ComponentShowcase({
     }
   });
 
-  // Subscribe to theme changes
   React.useEffect(() => {
     const unsubscribe = themeManager.subscribe((event) => {
       setActiveTheme(event.newTheme);
@@ -272,12 +229,9 @@ export function ComponentShowcase({
     return () => unsubscribe();
   }, [themeManager]);
 
-  // Sync URL with state changes
   React.useEffect(() => {
     const currentPath = location.pathname;
     const expectedBasePath = `/showcase/${activeModule}`;
-    
-    // Only update URL if module changed
     if (!currentPath.startsWith(expectedBasePath)) {
       const sizeParam = searchParams.get('size');
       const newPath = sizeParam 
@@ -287,7 +241,6 @@ export function ComponentShowcase({
     }
   }, [activeModule, location.pathname, navigate, searchParams]);
 
-  // Notify parent of state changes
   React.useEffect(() => {
     onStateChange?.({
       activeModule,
@@ -297,44 +250,34 @@ export function ComponentShowcase({
     });
   }, [activeModule, activeItemId, screenSize, theme, onStateChange]);
 
-  // Handle module change
   const handleModuleChange = React.useCallback((module: ShowcaseModule) => {
     setActiveModule(module);
-    setActiveItemId(null); // Reset item selection when switching modules
+    setActiveItemId(null);
   }, []);
 
-  // Handle screen size change
   const handleScreenSizeChange = React.useCallback((size: ScreenSize) => {
     setScreenSize(size);
   }, []);
 
-  // Handle theme toggle
   const handleThemeToggle = React.useCallback(() => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   }, []);
 
-  // Handle "Open in Editor" - navigate to main page with schema
   const handleOpenInEditor = React.useCallback((schema: UISchema) => {
     sessionStorage.setItem('llm2ui-schema', JSON.stringify(schema));
     navigate('/');
   }, [navigate]);
 
-  // Convert theme tokens to DesignTokens format for TokensModule
   const themeDesignTokens = React.useMemo(() => {
     if (!activeTheme) return undefined;
-    // ThemeTokens 和 DesignTokens 结构类似，可以直接使用
     return activeTheme.tokens as unknown as import('@/lib/design-tokens').DesignTokens;
   }, [activeTheme]);
 
-  // Get component registry from active theme
   const themeRegistry = React.useMemo(() => {
     if (!activeTheme) return undefined;
-    // 使用 unknown 作为中间类型来绕过两个 ComponentRegistry 类型不兼容的问题
-    // 两个类的接口是兼容的，只是来自不同的模块
     return activeTheme.components.registry as unknown as import('@/lib/component-registry').ComponentRegistry;
   }, [activeTheme]);
 
-  // Convert theme examples to ExampleMetadata format for ExamplesModule
   const themeExamples = React.useMemo(() => {
     if (!activeTheme) return undefined;
     return activeTheme.examples.presets.map((preset) => ({
@@ -348,7 +291,6 @@ export function ComponentShowcase({
     }));
   }, [activeTheme]);
 
-  // Render active module content
   const renderModuleContent = () => {
     switch (activeModule) {
       case 'tokens':
@@ -400,7 +342,6 @@ export function ComponentShowcase({
 
   return (
     <div className={cn('flex flex-col h-full bg-background', className)}>
-      {/* Header with tabs and controls */}
       <Header
         activeModule={activeModule}
         onModuleChange={handleModuleChange}
@@ -409,8 +350,6 @@ export function ComponentShowcase({
         theme={theme}
         onThemeToggle={handleThemeToggle}
       />
-
-      {/* Module Content */}
       <main className="flex-1 overflow-hidden">
         {renderModuleContent()}
       </main>

@@ -14,9 +14,21 @@
  */
 
 import * as React from 'react';
-import { Trash2 } from 'lucide-react';
+import { 
+  Trash2, 
+  FileText,
+  X,
+  Paperclip,
+  Image,
+  Brain,
+  Search,
+  Settings,
+  Mic,
+  Send
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { ContextProgress } from '@/components/ui/context-progress';
 import { cn } from '@/lib/utils';
 import type { ConversationMessage } from '@/lib/state-management';
 import {
@@ -38,7 +50,9 @@ import type { SyncResult } from '@/lib';
 import type { UISchema, DataContext } from '@/types';
 import { MessageBubble, LoadingIndicator } from './MessageBubble';
 import { ModelSwitcher } from './ModelSwitcher';
+import { ContextSettingsPanel } from './ContextSettingsPanel';
 import { LLMSettingsDialog } from '@/components/settings';
+import { useAppStore } from '@/stores';
 
 // ============================================================================
 // Types
@@ -98,7 +112,45 @@ export function ChatInterface({
   const [inputValue, setInputValue] = React.useState('');
   const [internalLoading, setInternalLoading] = React.useState(false);
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
+  
+  const contextSettings = useAppStore((state) => state.contextSettings);
+  const setContextSettings = useAppStore((state) => state.setContextSettings);
+  
+  // Convert PersistedContextSettings to ContextSettings for ContextSettingsPanel
+  const contextSettingsForPanel = React.useMemo(() => ({
+    themeId: contextSettings.themeId,
+    components: {
+      mode: contextSettings.componentsMode,
+      selectedIds: contextSettings.selectedComponentIds,
+      presetName: contextSettings.componentPresetName,
+    },
+    examples: {
+      mode: contextSettings.examplesMode,
+      selectedIds: contextSettings.selectedExampleIds,
+      maxCount: contextSettings.maxExampleCount,
+    },
+    colorScheme: {
+      id: contextSettings.colorSchemeId,
+      includeInPrompt: contextSettings.includeColorInPrompt,
+    },
+    tokenBudget: {
+      max: contextSettings.tokenBudgetMax,
+      autoOptimize: contextSettings.tokenAutoOptimize,
+    },
+  }), [contextSettings]);
+  
+  const contextUsed = React.useMemo(() => {
+    return messages.reduce((acc, msg) => acc + msg.content.length, 0);
+  }, [messages]);
+  
+  const contextTotal = contextSettings.tokenBudgetMax || 4000;
+  
+  // File attachments state
+  const [attachedFiles, setAttachedFiles] = React.useState<Array<{ id: string; name: string; type: string }>>([]);
+  // Toggle states
+  const [deepThinkingEnabled, setDeepThinkingEnabled] = React.useState(false);
+  const [searchEnabled, setSearchEnabled] = React.useState(false);
 
   // LLM configuration state
   const [internalLLMConfig, setInternalLLMConfig] = React.useState<LLMConfig | null>(() => {
@@ -243,13 +295,14 @@ export function ChatInterface({
         // Try to extract UISchema when done (with autoFix to resolve type aliases)
         if (chunk.done && fullContent) {
           const result = extractUISchema(fullContent, { autoFix: true });
-          const schema = result && 'schema' in result ? result.schema : result;
-          if (schema) {
+          const extractedSchema = result && typeof result === 'object' && 'schema' in result ? result.schema : result;
+          const isValidSchema = extractedSchema && typeof extractedSchema === 'object' && 'version' in extractedSchema && 'root' in extractedSchema;
+          if (isValidSchema) {
             onMessageUpdate?.(assistantMessageId, {
-              extractedSchema: schema,
+              extractedSchema: extractedSchema as UISchema,
             });
             // Use handleApplyToEditor for schema sync
-            handleApplyToEditor(schema);
+            handleApplyToEditor(extractedSchema as UISchema);
           }
         }
       }
@@ -277,7 +330,7 @@ export function ChatInterface({
    * Handles key press in input
    */
   const handleKeyPress = React.useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleSend();
@@ -285,6 +338,77 @@ export function ChatInterface({
     },
     [handleSend]
   );
+
+  /**
+   * Handles file upload
+   */
+  const handleFileUpload = React.useCallback(() => {
+    // TODO: Implement file upload functionality
+    console.log('File upload clicked');
+  }, []);
+
+  /**
+   * Handles image upload
+   */
+  const handleImageUpload = React.useCallback(() => {
+    // TODO: Implement image upload functionality
+    console.log('Image upload clicked');
+  }, []);
+
+  /**
+   * Handles removing an attached file
+   */
+  const handleRemoveFile = React.useCallback((fileId: string) => {
+    setAttachedFiles(prev => prev.filter(f => f.id !== fileId));
+  }, []);
+
+  /**
+   * Toggles deep thinking mode
+   */
+  const toggleDeepThinking = React.useCallback(() => {
+    setDeepThinkingEnabled(prev => !prev);
+  }, []);
+
+  /**
+   * Toggles search mode
+   */
+  const toggleSearch = React.useCallback(() => {
+    setSearchEnabled(prev => !prev);
+  }, []);
+
+  /**
+   * Handles clearing context
+   */
+  const handleClearContext = React.useCallback(() => {
+    onClearConversation?.();
+  }, [onClearConversation]);
+
+  /**
+   * Handles compressing context
+   */
+  const handleCompressContext = React.useCallback(() => {
+    console.log('压缩上下文功能开发中...');
+  }, []);
+
+  /**
+   * Handles context settings change from ContextSettingsPanel
+   */
+  const handleContextSettingsChange = React.useCallback((settings: any) => {
+    // Convert ContextSettings to PersistedContextSettings format
+    setContextSettings({
+      themeId: settings.themeId,
+      componentsMode: settings.components.mode,
+      selectedComponentIds: settings.components.selectedIds,
+      componentPresetName: settings.components.presetName,
+      examplesMode: settings.examples.mode,
+      selectedExampleIds: settings.examples.selectedIds,
+      maxExampleCount: settings.examples.maxCount,
+      colorSchemeId: settings.colorScheme.id,
+      includeColorInPrompt: settings.colorScheme.includeInPrompt,
+      tokenBudgetMax: settings.tokenBudget.max,
+      tokenAutoOptimize: settings.tokenBudget.autoOptimize,
+    });
+  }, [setContextSettings]);
 
   return (
     <div className={cn('flex flex-col h-full', className)}>
@@ -335,23 +459,134 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="border-t p-4">
-        <div className="flex gap-2">
-          <Input
-            ref={inputRef}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={placeholder}
-            disabled={loading || !llmConfig}
-            className="flex-1"
-          />
-          <Button
-            onClick={handleSend}
-            disabled={loading || !inputValue.trim() || !llmConfig}
-          >
-            {loading ? '发送中...' : '发送'}
-          </Button>
+      <div className="border-t bg-white">
+        <div className="flex flex-col border rounded-lg p-2 bg-white shadow-sm m-4">
+          
+          {/* File references area */}
+          {attachedFiles.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-2">
+              {attachedFiles.map((file) => (
+                <div
+                  key={file.id}
+                  className="flex items-center bg-slate-100 rounded-full px-3 py-1 text-sm"
+                >
+                  <FileText className="mr-1" size={14} />
+                  <span className="ml-1 mr-2">{file.name}</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-4 w-4 p-0"
+                    onClick={() => handleRemoveFile(file.id)}
+                  >
+                    <X size={12} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Text input area */}
+          <div className="relative">
+            <Textarea
+              ref={inputRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyPress}
+              placeholder={placeholder}
+              disabled={loading || !llmConfig}
+              className="w-full min-h-[80px] resize-none border-none focus:outline-none"
+            />
+          </div>
+
+          {/* Bottom controls */}
+          <div className="flex items-center justify-between mt-2">
+            {/* Icon button group */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-600 hover:text-slate-900"
+                onClick={handleFileUpload}
+                title="上传文件"
+              >
+                <Paperclip size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-600 hover:text-slate-900"
+                onClick={handleImageUpload}
+                title="上传图片"
+              >
+                <Image size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "text-slate-600 hover:text-slate-900",
+                  deepThinkingEnabled && "bg-slate-200"
+                )}
+                onClick={toggleDeepThinking}
+                title="深度思考"
+              >
+                <Brain size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={cn(
+                  "text-slate-600 hover:text-slate-900",
+                  searchEnabled && "bg-slate-200"
+                )}
+                onClick={toggleSearch}
+                title="搜索"
+              >
+                <Search size={16} />
+              </Button>
+            </div>
+
+            {/* Options menu */}
+            <div className="flex items-center gap-2">
+              <ContextProgress
+                used={contextUsed}
+                total={contextTotal}
+                onClear={handleClearContext}
+                onCompress={handleCompressContext}
+              />
+              <ContextSettingsPanel
+                settings={contextSettingsForPanel}
+                onSettingsChange={handleContextSettingsChange}
+              />
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-600 hover:text-slate-900"
+                onClick={() => setSettingsOpen(true)}
+                title="设置"
+              >
+                <Settings size={16} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-slate-600 hover:text-slate-900 ml-2"
+                title="语音输入"
+              >
+                <Mic size={16} />
+              </Button>
+              <Button
+                variant="default"
+                size="sm"
+                className="ml-2"
+                onClick={handleSend}
+                disabled={loading || !inputValue.trim() || !llmConfig}
+                title="发送"
+              >
+                <Send size={16} />
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 

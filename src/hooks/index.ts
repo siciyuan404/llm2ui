@@ -19,3 +19,6 @@ export { useChatState, type UseChatState } from './useChatState';
 
 // 主题管理 Hook
 export { useTheme, type UseThemeReturn } from './useTheme';
+
+// 开发者模式 Hook
+export { useDevMode, type UseDevModeReturn } from './useDevMode';

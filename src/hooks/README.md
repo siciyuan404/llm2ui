@@ -12,6 +12,7 @@ hooks/
 ├── useEditorResize.ts    # 编辑器面板拖拽
 ├── useChatState.ts       # 聊天状态管理
 ├── useTheme.ts           # 主题管理
+├── useDevMode.ts         # 开发者模式管理
 └── README.md             # 本文件
 ```
 
@@ -25,6 +26,7 @@ hooks/
 | `useEditorResize.ts` | 封装编辑器面板拖拽调整大小逻辑 | 4.4 |
 | `useChatState.ts` | 封装聊天状态管理逻辑 | 4.5 |
 | `useTheme.ts` | 封装主题管理逻辑，统一管理主题切换时的所有同步操作 | 11.4, 11.5, 11.6 |
+| `useDevMode.ts` | 封装开发者模式管理，提供组件轮廓显示和 Alt+点击复制功能 | - |
 
 ## 使用方式
 

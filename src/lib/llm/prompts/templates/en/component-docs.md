@@ -109,3 +109,49 @@ Badge component.
   "children": [{ "type": "Text", "props": { "content": "New" } }]
 }
 ```
+
+### Bubble
+Bubble popup component with circular progress trigger.
+
+```json
+{
+  "type": "Bubble",
+  "props": {},
+  "children": [
+    {
+      "type": "BubbleProgressTrigger",
+      "props": {
+        "progress": 75,
+        "size": 48,
+        "strokeWidth": 4
+      },
+      "children": [{ "type": "Text", "props": { "content": "75%" } }]
+    },
+    {
+      "type": "BubbleContent",
+      "props": {
+        "align": "center",
+        "side": "top"
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": { "content": "Task Progress Details" }
+        }
+      ]
+    }
+  ]
+}
+```
+
+BubbleProgressTrigger properties:
+- `progress`: Progress value (0-100)
+- `size`: Circle size, default 32
+- `strokeWidth`: Progress bar width, default 3
+- `color`: Progress bar color, default theme primary
+- `backgroundColor`: Background color, default theme secondary
+
+BubbleContent properties:
+- `align`: Alignment ("start" | "center" | "end"), default "center"
+- `side`: Popup position ("top" | "right" | "bottom" | "left")
+

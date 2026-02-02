@@ -9,7 +9,7 @@
  */
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
+import { cn, copyToClipboard } from '@/lib/utils';
 import {
   defaultIconRegistry,
   initializeDefaultIcons,
@@ -158,32 +158,6 @@ export function generateIconCode(icon: IconDefinition, size: IconSize, color: st
   const pixels = SIZE_OPTIONS[size].pixels;
   const colorAttr = color === 'currentColor' ? '' : ` color="${color}"`;
   return `<Icon name="${icon.name}" size={${pixels}}${colorAttr} />`;
-}
-
-/**
- * Copy text to clipboard
- */
-export async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // Fallback for older browsers
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-      return true;
-    } catch {
-      return false;
-    } finally {
-      document.body.removeChild(textarea);
-    }
-  }
 }
 
 // ============================================================================
@@ -541,3 +515,6 @@ export function IconLibrary({ onIconSelect, className }: IconLibraryProps) {
 }
 
 export default IconLibrary;
+
+
+export { copyToClipboard } from '@/lib/utils';

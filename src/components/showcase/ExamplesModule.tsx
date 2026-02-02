@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
+import { cn, copyToClipboard } from '@/lib/utils';
 import {
   LayoutGrid,
   FormInput,
@@ -15,9 +15,6 @@ import {
   LayoutDashboard,
   Image,
   MessageSquare,
-  Monitor,
-  Tablet,
-  Smartphone,
 } from 'lucide-react';
 import type { UISchema } from '@/types';
 import {
@@ -40,6 +37,8 @@ import { ErrorBoundary, DefaultErrorFallback } from '@/components/preview/ErrorB
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChevronIcon } from '@/components/ui/icons';
+import { ScreenSizeSwitcher, getScreenSizeDimensions } from './ScreenSizeSwitcher';
 
 // ============================================================================
 // Types
@@ -120,43 +119,9 @@ const EXAMPLE_CATEGORIES: ExampleCategoryConfig[] = [
   { id: 'feedback', label: 'Feedback', icon: <MessageSquare className="w-4 h-4" /> },
 ];
 
-/**
- * 屏幕尺寸配置，使用 lucide-react 图标
- */
-const SCREEN_SIZE_CONFIG: Record<ScreenSize, { label: string; width: string; icon: React.ReactNode }> = {
-  desktop: { label: 'Desktop', width: '100%', icon: <Monitor className="w-4 h-4" /> },
-  tablet: { label: 'Tablet', width: '768px', icon: <Tablet className="w-4 h-4" /> },
-  mobile: { label: 'Mobile', width: '375px', icon: <Smartphone className="w-4 h-4" /> },
-};
-
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/**
- * 复制文本到剪贴板
- */
-async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-      return true;
-    } catch {
-      return false;
-    } finally {
-      document.body.removeChild(textarea);
-    }
-  }
-}
 
 /**
  * 将 CustomExample 转换为 ExampleMetadata 格式
@@ -206,54 +171,6 @@ function groupExamplesByCategory(examples: ExampleMetadata[]): Map<ExampleCatego
 // ============================================================================
 // Sub-Components
 // ============================================================================
-
-/**
- * Chevron 图标
- */
-function ChevronIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={cn('w-4 h-4', className)}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  );
-}
-
-/**
- * 屏幕尺寸切换器
- */
-function ScreenSizeSwitcher({
-  currentSize,
-  onSizeChange,
-}: {
-  currentSize: ScreenSize;
-  onSizeChange: (size: ScreenSize) => void;
-}) {
-  return (
-    <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-md">
-      {(Object.keys(SCREEN_SIZE_CONFIG) as ScreenSize[]).map(size => (
-        <button
-          key={size}
-          onClick={() => onSizeChange(size)}
-          className={cn(
-            'px-2 py-1 text-xs rounded transition-colors flex items-center gap-1',
-            currentSize === size
-              ? 'bg-primary text-primary-foreground'
-              : 'hover:bg-muted text-muted-foreground'
-          )}
-          title={SCREEN_SIZE_CONFIG[size].label}
-        >
-          {SCREEN_SIZE_CONFIG[size].icon}
-          <span className="hidden sm:inline">{SCREEN_SIZE_CONFIG[size].label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
 
 
 /**
@@ -407,7 +324,7 @@ function ExamplePreview({
   previewSize: ScreenSize;
 }) {
   const [errorKey, setErrorKey] = React.useState(0);
-  const sizeConfig = SCREEN_SIZE_CONFIG[previewSize];
+  const sizeConfig = getScreenSizeDimensions(previewSize);
 
   const handleErrorReset = () => {
     setErrorKey(k => k + 1);
@@ -675,8 +592,9 @@ export function ExampleDoc({
             </div>
             {onPreviewSizeChange && (
               <ScreenSizeSwitcher
-                currentSize={previewSize}
-                onSizeChange={onPreviewSizeChange}
+                value={previewSize}
+                onChange={onPreviewSizeChange}
+                syncWithUrl={false}
               />
             )}
           </div>

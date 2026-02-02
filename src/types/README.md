@@ -52,6 +52,8 @@ TypeScript 类型定义目录，定义 LLM2UI 系统的核心数据结构。
 - `EditorState` - 编辑器状态
 - `UIState` - UI 状态
 - `ConversationMessage` - 对话消息
+- `DevModeStatus` - 开发者模式状态 ('on' | 'off')
+- `ComponentDebugInfo` - 组件调试信息
 
 ## 更新提醒
 

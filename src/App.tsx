@@ -20,6 +20,7 @@ import { ThreeColumnLayout, ResizeHandle } from '@/components/layout';
 import { ChatInterface } from '@/components/chat';
 import { JsonSchemaEditor, DataBindingEditor } from '@/components/editor';
 import { PreviewPanelWithControls } from '@/components/preview';
+import { DevModeToggle } from '@/components/dev-mode';
 import { useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import type { UISchema, DataContext } from '@/types';
@@ -197,7 +198,8 @@ function App() {
         <div className="flex items-center gap-4">
           <span className="font-semibold text-sm">LLM2UI</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <DevModeToggle showLabel={true} className="text-xs" />
           <Link
             to="/showcase"
             className="px-3 py-1.5 text-sm rounded-md hover:bg-muted transition-colors"

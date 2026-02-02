@@ -109,3 +109,49 @@
   "children": [{ "type": "Text", "props": { "content": "新" } }]
 }
 ```
+
+### Bubble
+泡泡弹出组件，点击圆形进度条可展开弹出内容。
+
+```json
+{
+  "type": "Bubble",
+  "props": {},
+  "children": [
+    {
+      "type": "BubbleProgressTrigger",
+      "props": {
+        "progress": 75,
+        "size": 48,
+        "strokeWidth": 4
+      },
+      "children": [{ "type": "Text", "props": { "content": "75%" } }]
+    },
+    {
+      "type": "BubbleContent",
+      "props": {
+        "align": "center",
+        "side": "top"
+      },
+      "children": [
+        {
+          "type": "Text",
+          "props": { "content": "任务进度详情" }
+        }
+      ]
+    }
+  ]
+}
+```
+
+BubbleProgressTrigger 支持的属性：
+- `progress`: 进度值 (0-100)
+- `size`: 圆形尺寸，默认 32
+- `strokeWidth`: 进度条宽度，默认 3
+- `color`: 进度条颜色，默认使用主题色
+- `backgroundColor`: 背景颜色，默认使用次要颜色
+
+BubbleContent 支持的属性：
+- `align`: 对齐方式 ("start" | "center" | "end")，默认 "center"
+- `side`: 弹出位置 ("top" | "right" | "bottom" | "left")
+

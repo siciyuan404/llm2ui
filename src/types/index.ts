@@ -61,6 +61,8 @@ export type {
 
 // 状态管理类型
 export type {
+  DevModeStatus,
+  ComponentDebugInfo,
   MessageRole,
   MessageStatus,
   MessageMetadata,

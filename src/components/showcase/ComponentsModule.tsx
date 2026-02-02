@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
+import { cn, copyToClipboard } from '@/lib/utils';
 import {
   LayoutGrid,
   Type,
@@ -17,20 +17,14 @@ import {
   MessageSquare,
   BarChart3,
   Layers,
-  Monitor,
-  Tablet,
-  Smartphone,
   Package,
 } from 'lucide-react';
 import {
   defaultRegistry,
-  defaultComponentMappingRegistry,
 } from '@/lib';
 import type {
   ComponentDefinition,
   ComponentRegistry,
-  PropSchema,
-  PropTokenMapping,
   ScreenSize,
 } from '@/lib';
 import type { UISchema } from '@/types';
@@ -39,24 +33,18 @@ import { ErrorBoundary, DefaultErrorFallback } from '@/components/preview/ErrorB
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChevronIcon } from '@/components/ui/icons';
+import { ScreenSizeSwitcher, getScreenSizeDimensions } from './ScreenSizeSwitcher';
+import {
+  PropsTable,
+  TokenMappingsSection,
+  CategorySidebar,
+  type ComponentCategoryConfig,
+} from './components-module';
 
 // ============================================================================
 // Types
 // ============================================================================
-
-/**
- * 组件分类配置
- */
-export interface ComponentCategoryConfig {
-  /** 分类 ID */
-  id: string;
-  /** 分类标签 */
-  label: string;
-  /** 分类图标 */
-  icon?: React.ReactNode;
-  /** 分类下的组件名称列表 */
-  components: string[];
-}
 
 /**
  * ComponentsModule Props
@@ -175,43 +163,9 @@ const DEFAULT_CATEGORIES: ComponentCategoryConfig[] = [
   },
 ];
 
-/**
- * 屏幕尺寸配置，使用 lucide-react 图标
- */
-const SCREEN_SIZE_CONFIG: Record<ScreenSize, { label: string; width: string; icon: React.ReactNode }> = {
-  desktop: { label: 'Desktop', width: '100%', icon: <Monitor className="w-4 h-4" /> },
-  tablet: { label: 'Tablet', width: '768px', icon: <Tablet className="w-4 h-4" /> },
-  mobile: { label: 'Mobile', width: '375px', icon: <Smartphone className="w-4 h-4" /> },
-};
-
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/**
- * 复制文本到剪贴板
- */
-async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-      return true;
-    } catch {
-      return false;
-    } finally {
-      document.body.removeChild(textarea);
-    }
-  }
-}
 
 /**
  * 生成组件预览 Schema
@@ -357,514 +311,7 @@ function generateCategoriesFromRegistry(registry: ComponentRegistry): ComponentC
 // Sub-Components
 // ============================================================================
 
-
-/**
- * 分类侧边栏组件
- */
-function CategorySidebar({
-  categories,
-  activeComponent,
-  onComponentSelect,
-  registry,
-}: {
-  categories: ComponentCategoryConfig[];
-  activeComponent: string | null;
-  onComponentSelect: (name: string) => void;
-  registry: ComponentRegistry;
-}) {
-  const [expandedCategories, setExpandedCategories] = React.useState<Set<string>>(() => {
-    // 默认展开包含当前选中组件的分类
-    const expanded = new Set<string>();
-    if (activeComponent) {
-      for (const category of categories) {
-        if (category.components.includes(activeComponent)) {
-          expanded.add(category.id);
-          break;
-        }
-      }
-    }
-    // 默认展开第一个分类
-    if (expanded.size === 0 && categories.length > 0) {
-      expanded.add(categories[0].id);
-    }
-    return expanded;
-  });
-
-  const toggleCategory = (categoryId: string) => {
-    setExpandedCategories(prev => {
-      const next = new Set(prev);
-      if (next.has(categoryId)) {
-        next.delete(categoryId);
-      } else {
-        next.add(categoryId);
-      }
-      return next;
-    });
-  };
-
-  return (
-    <div className="w-56 border-r bg-muted/30 flex-shrink-0">
-      <div className="p-4 border-b">
-        <h3 className="text-sm font-semibold">Components</h3>
-      </div>
-      <ScrollArea className="h-[calc(100%-57px)]">
-        <div className="p-2">
-          {categories.map(category => {
-            const isExpanded = expandedCategories.has(category.id);
-            const registeredCount = category.components.filter(name => 
-              registry.has(name)
-            ).length;
-
-            return (
-              <div key={category.id} className="mb-1">
-                {/* Category Header */}
-                <button
-                  onClick={() => toggleCategory(category.id)}
-                  className={cn(
-                    'w-full flex items-center justify-between px-3 py-2 text-sm font-medium',
-                    'rounded-md transition-colors hover:bg-muted'
-                  )}
-                >
-                  <span className="flex items-center gap-2">
-                    <ChevronIcon className={cn('transition-transform', isExpanded && 'rotate-90')} />
-                    {category.icon}
-                    <span>{category.label}</span>
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {registeredCount}/{category.components.length}
-                  </span>
-                </button>
-
-                {/* Category Items */}
-                {isExpanded && (
-                  <div className="ml-4 space-y-0.5">
-                    {category.components.map(componentName => {
-                      const isRegistered = registry.has(componentName);
-                      const isActive = activeComponent === componentName;
-                      const componentDef = registry.get(componentName);
-
-                      return (
-                        <button
-                          key={componentName}
-                          onClick={() => isRegistered && onComponentSelect(componentName)}
-                          disabled={!isRegistered}
-                          className={cn(
-                            'w-full text-left px-3 py-1.5 text-sm rounded-md transition-colors',
-                            'flex items-center justify-between gap-2',
-                            isActive
-                              ? 'bg-primary text-primary-foreground'
-                              : isRegistered
-                              ? 'hover:bg-muted'
-                              : 'text-muted-foreground cursor-not-allowed opacity-60'
-                          )}
-                        >
-                          <div className="flex flex-col min-w-0">
-                            <span className="truncate">{componentName}</span>
-                            {componentDef?.description && isRegistered && (
-                              <span className={cn(
-                                'text-xs truncate',
-                                isActive ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                              )}>
-                                {componentDef.description.slice(0, 30)}
-                                {componentDef.description.length > 30 ? '...' : ''}
-                              </span>
-                            )}
-                          </div>
-                          {!isRegistered && (
-                            <span className="text-xs px-1.5 py-0.5 rounded bg-muted text-muted-foreground shrink-0">
-                              Coming Soon
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
-    </div>
-  );
-}
-
-/**
- * Chevron 图标
- */
-function ChevronIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      className={cn('w-4 h-4', className)}
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  );
-}
-
-/**
- * 屏幕尺寸切换器
- */
-function ScreenSizeSwitcher({
-  currentSize,
-  onSizeChange,
-}: {
-  currentSize: ScreenSize;
-  onSizeChange: (size: ScreenSize) => void;
-}) {
-  return (
-    <div className="flex items-center gap-1 p-1 bg-muted/50 rounded-md">
-      {(Object.keys(SCREEN_SIZE_CONFIG) as ScreenSize[]).map(size => (
-        <button
-          key={size}
-          onClick={() => onSizeChange(size)}
-          className={cn(
-            'px-2 py-1 text-xs rounded transition-colors flex items-center gap-1',
-            currentSize === size
-              ? 'bg-primary text-primary-foreground'
-              : 'hover:bg-muted text-muted-foreground'
-          )}
-          title={SCREEN_SIZE_CONFIG[size].label}
-        >
-          {SCREEN_SIZE_CONFIG[size].icon}
-          <span className="hidden sm:inline">{SCREEN_SIZE_CONFIG[size].label}</span>
-        </button>
-      ))}
-    </div>
-  );
-}
-
-/**
- * 类型徽章组件
- */
-function TypeBadge({ type }: { type: PropSchema['type'] }) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center px-2 py-0.5 text-xs font-mono rounded',
-        getTypeBadgeClass(type)
-      )}
-    >
-      {getTypeDisplayName(type)}
-    </span>
-  );
-}
-
-/**
- * 枚举值展示组件
- */
-function EnumBadges({ values }: { values: string[] }) {
-  if (!values || values.length === 0) return null;
-
-  return (
-    <div className="flex flex-wrap gap-1 mt-1">
-      {values.map((value, index) => (
-        <code
-          key={index}
-          className="px-1.5 py-0.5 text-xs bg-muted rounded font-mono"
-        >
-          "{value}"
-        </code>
-      ))}
-    </div>
-  );
-}
-
-/**
- * 复杂类型展开组件
- */
-function ComplexTypeExpander({
-  schema,
-  isExpanded,
-  onToggle,
-}: {
-  schema: PropSchema;
-  isExpanded: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div className="mt-2">
-      <button
-        onClick={onToggle}
-        className="text-xs text-primary hover:underline flex items-center gap-1"
-      >
-        <ChevronIcon className={cn('w-3 h-3 transition-transform', isExpanded && 'rotate-90')} />
-        {isExpanded ? '收起类型定义' : '展开类型定义'}
-      </button>
-      {isExpanded && (
-        <pre className="mt-2 p-2 bg-muted rounded text-xs font-mono overflow-auto">
-          {JSON.stringify(schema, null, 2)}
-        </pre>
-      )}
-    </div>
-  );
-}
-
-/**
- * Props 表格行组件
- */
-function PropRow({
-  name,
-  schema,
-  expandedProps,
-  onToggleExpand,
-}: {
-  name: string;
-  schema: PropSchema;
-  expandedProps: Set<string>;
-  onToggleExpand: (name: string) => void;
-}) {
-  const isComplex = schema.type === 'object' || schema.type === 'array';
-  const isExpanded = expandedProps.has(name);
-
-  return (
-    <tr className="border-b border-border last:border-b-0">
-      <td className="py-3 px-4">
-        <code className="text-sm font-semibold font-mono">{name}</code>
-        {schema.required && (
-          <span className="ml-2 text-xs px-1.5 py-0.5 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 rounded">
-            必填
-          </span>
-        )}
-      </td>
-      <td className="py-3 px-4 text-sm text-muted-foreground">
-        {schema.description || '-'}
-      </td>
-      <td className="py-3 px-4">
-        <TypeBadge type={schema.type} />
-        {schema.enum && <EnumBadges values={schema.enum} />}
-        {isComplex && (
-          <ComplexTypeExpander
-            schema={schema}
-            isExpanded={isExpanded}
-            onToggle={() => onToggleExpand(name)}
-          />
-        )}
-      </td>
-      <td className="py-3 px-4">
-        <code className="text-xs font-mono bg-muted px-1.5 py-0.5 rounded">
-          {formatDefaultValue(schema.default)}
-        </code>
-      </td>
-    </tr>
-  );
-}
-
-/**
- * Props 表格组件
- */
-function PropsTable({
-  propsSchema,
-}: {
-  propsSchema: Record<string, PropSchema>;
-}) {
-  const [expandedProps, setExpandedProps] = React.useState<Set<string>>(new Set());
-
-  const toggleExpand = (name: string) => {
-    setExpandedProps(prev => {
-      const next = new Set(prev);
-      if (next.has(name)) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-      return next;
-    });
-  };
-
-  // 排序：必填优先，然后按字母排序
-  const sortedProps = React.useMemo(() => {
-    return Object.entries(propsSchema).sort((a, b) => {
-      const aRequired = a[1].required ?? false;
-      const bRequired = b[1].required ?? false;
-      if (aRequired !== bRequired) {
-        return bRequired ? 1 : -1;
-      }
-      return a[0].localeCompare(b[0]);
-    });
-  }, [propsSchema]);
-
-  if (sortedProps.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">此组件暂无属性文档</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-left">
-        <thead>
-          <tr className="border-b border-border bg-muted/30">
-            <th className="py-2 px-4 text-sm font-medium">Name</th>
-            <th className="py-2 px-4 text-sm font-medium">Description</th>
-            <th className="py-2 px-4 text-sm font-medium">Type/Options</th>
-            <th className="py-2 px-4 text-sm font-medium">Default</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedProps.map(([name, schema]) => (
-            <PropRow
-              key={name}
-              name={name}
-              schema={schema}
-              expandedProps={expandedProps}
-              onToggleExpand={toggleExpand}
-            />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-/**
- * Token 类别徽章颜色映射
- */
-const TOKEN_CATEGORY_COLORS: Record<string, string> = {
-  colors: 'bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-400',
-  spacing: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
-  typography: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-  shadows: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400',
-  radius: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
-};
-
-/**
- * Token 类别徽章组件
- */
-function TokenCategoryBadge({ category }: { category: string }) {
-  const colorClass = TOKEN_CATEGORY_COLORS[category] || 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
-  return (
-    <span className={cn('inline-flex items-center px-2 py-0.5 text-xs font-medium rounded', colorClass)}>
-      {category}
-    </span>
-  );
-}
-
-/**
- * Token 映射行组件
- */
-function TokenMappingRow({ propMapping }: { propMapping: PropTokenMapping }) {
-  const [isExpanded, setIsExpanded] = React.useState(false);
-  const hasEnumMap = propMapping.enumTokenMap && Object.keys(propMapping.enumTokenMap).length > 0;
-
-  return (
-    <tr className="border-b border-border last:border-b-0">
-      <td className="py-3 px-4">
-        <code className="text-sm font-semibold font-mono">{propMapping.propName}</code>
-      </td>
-      <td className="py-3 px-4">
-        <div className="flex flex-wrap gap-1">
-          {propMapping.tokenCategories.map(category => (
-            <TokenCategoryBadge key={category} category={category} />
-          ))}
-        </div>
-      </td>
-      <td className="py-3 px-4 text-sm text-muted-foreground">
-        {propMapping.description}
-        {hasEnumMap && (
-          <div className="mt-2">
-            <button
-              onClick={() => setIsExpanded(!isExpanded)}
-              className="text-xs text-primary hover:underline flex items-center gap-1"
-            >
-              <ChevronIcon className={cn('w-3 h-3 transition-transform', isExpanded && 'rotate-90')} />
-              {isExpanded ? '收起枚举映射' : '展开枚举映射'}
-            </button>
-            {isExpanded && propMapping.enumTokenMap && (
-              <div className="mt-2 space-y-1">
-                {Object.entries(propMapping.enumTokenMap).map(([enumValue, tokenRef]) => (
-                  <div key={enumValue} className="flex items-center gap-2 text-xs">
-                    <code className="px-1.5 py-0.5 bg-muted rounded font-mono">"{enumValue}"</code>
-                    <span className="text-muted-foreground">→</span>
-                    <code className="px-1.5 py-0.5 bg-primary/10 text-primary rounded font-mono">{tokenRef}</code>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </td>
-    </tr>
-  );
-}
-
-/**
- * Token 映射表格组件
- * 显示组件的每个 Prop 应该使用哪些 Tokens
- * @requirements 6.2
- */
-function TokenMappingsSection({ componentName }: { componentName: string }) {
-  const mapping = defaultComponentMappingRegistry.getMapping(componentName);
-
-  if (!mapping || mapping.propMappings.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
-        <p className="text-sm">此组件暂无 Token 映射信息</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Token 映射表格 */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="py-2 px-4 text-sm font-medium">Prop</th>
-              <th className="py-2 px-4 text-sm font-medium">Token Categories</th>
-              <th className="py-2 px-4 text-sm font-medium">Description</th>
-            </tr>
-          </thead>
-          <tbody>
-            {mapping.propMappings.map(propMapping => (
-              <TokenMappingRow key={propMapping.propName} propMapping={propMapping} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* 推荐的样式 Token */}
-      {mapping.styleTokens && (
-        <div className="mt-4 p-4 bg-muted/30 rounded-lg">
-          <h4 className="text-sm font-medium mb-3">推荐的样式 Tokens</h4>
-          <div className="space-y-2">
-            {mapping.styleTokens.colors && mapping.styleTokens.colors.length > 0 && (
-              <div className="flex items-start gap-2">
-                <TokenCategoryBadge category="colors" />
-                <div className="flex flex-wrap gap-1">
-                  {mapping.styleTokens.colors.map(token => (
-                    <code key={token} className="text-xs px-1.5 py-0.5 bg-background rounded font-mono">
-                      {token}
-                    </code>
-                  ))}
-                </div>
-              </div>
-            )}
-            {mapping.styleTokens.spacing && mapping.styleTokens.spacing.length > 0 && (
-              <div className="flex items-start gap-2">
-                <TokenCategoryBadge category="spacing" />
-                <div className="flex flex-wrap gap-1">
-                  {mapping.styleTokens.spacing.map(token => (
-                    <code key={token} className="text-xs px-1.5 py-0.5 bg-background rounded font-mono">
-                      {token}
-                    </code>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
+// CategorySidebar, PropsTable, TokenMappingsSection 已拆分到 ./components-module/
 
 /**
  * 组件预览区域
@@ -912,7 +359,7 @@ function ComponentPreview({
   };
 
   const isRegistered = registry.has(component.name);
-  const sizeConfig = SCREEN_SIZE_CONFIG[previewSize];
+  const sizeConfig = getScreenSizeDimensions(previewSize);
 
   return (
     <div className="space-y-4">
@@ -1073,8 +520,9 @@ export function ComponentDoc({
             </div>
             {onPreviewSizeChange && (
               <ScreenSizeSwitcher
-                currentSize={previewSize}
-                onSizeChange={onPreviewSizeChange}
+                value={previewSize}
+                onChange={onPreviewSizeChange}
+                syncWithUrl={false}
               />
             )}
           </div>

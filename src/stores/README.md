@@ -32,6 +32,9 @@ interface AppState {
   // UI 状态
   editorSplitPercent: number;
   isResizingEditor: boolean;
+  
+  // 开发者模式
+  devMode: DevModeStatus;  // 'on' | 'off'
 }
 ```
 

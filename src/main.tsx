@@ -2,6 +2,7 @@
  * Application Entry Point
  * 
  * Sets up React Router for navigation between main app and showcase pages.
+ * Includes global DevModeProvider for developer tools across all routes.
  * 
  * @module main
  * @see Requirements 6.1, 6.2
@@ -12,6 +13,7 @@ console.log('[main.tsx] Starting application...');
 import { StrictMode, Component, type ReactNode, Suspense, lazy } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { DevModeProvider } from '@/components/dev-mode'
 
 console.log('[main.tsx] React imports loaded');
 
@@ -104,23 +106,25 @@ if (!rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
       <ErrorBoundary>
-        <Suspense fallback={<LoadingFallback />}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<App />} />
-              {/* Showcase routes - supports /showcase, /showcase/tokens, /showcase/components, /showcase/examples, /showcase/themes */}
-              <Route path="/showcase" element={<ComponentShowcase className="h-screen" />} />
-              <Route path="/showcase/tokens" element={<ComponentShowcase className="h-screen" initialModule="tokens" />} />
-              <Route path="/showcase/tokens/*" element={<ComponentShowcase className="h-screen" initialModule="tokens" />} />
-              <Route path="/showcase/components" element={<ComponentShowcase className="h-screen" initialModule="components" />} />
-              <Route path="/showcase/components/*" element={<ComponentShowcase className="h-screen" initialModule="components" />} />
-              <Route path="/showcase/examples" element={<ComponentShowcase className="h-screen" initialModule="examples" />} />
-              <Route path="/showcase/examples/*" element={<ComponentShowcase className="h-screen" initialModule="examples" />} />
-              <Route path="/showcase/themes" element={<ComponentShowcase className="h-screen" initialModule="themes" />} />
-              <Route path="/showcase/themes/*" element={<ComponentShowcase className="h-screen" initialModule="themes" />} />
-            </Routes>
-          </BrowserRouter>
-        </Suspense>
+        <DevModeProvider>
+          <Suspense fallback={<LoadingFallback />}>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<App />} />
+                {/* Showcase routes - supports /showcase, /showcase/tokens, /showcase/components, /showcase/examples, /showcase/themes */}
+                <Route path="/showcase" element={<ComponentShowcase className="h-screen" />} />
+                <Route path="/showcase/tokens" element={<ComponentShowcase className="h-screen" initialModule="tokens" />} />
+                <Route path="/showcase/tokens/*" element={<ComponentShowcase className="h-screen" initialModule="tokens" />} />
+                <Route path="/showcase/components" element={<ComponentShowcase className="h-screen" initialModule="components" />} />
+                <Route path="/showcase/components/*" element={<ComponentShowcase className="h-screen" initialModule="components" />} />
+                <Route path="/showcase/examples" element={<ComponentShowcase className="h-screen" initialModule="examples" />} />
+                <Route path="/showcase/examples/*" element={<ComponentShowcase className="h-screen" initialModule="examples" />} />
+                <Route path="/showcase/themes" element={<ComponentShowcase className="h-screen" initialModule="themes" />} />
+                <Route path="/showcase/themes/*" element={<ComponentShowcase className="h-screen" initialModule="themes" />} />
+              </Routes>
+            </BrowserRouter>
+          </Suspense>
+        </DevModeProvider>
       </ErrorBoundary>
     </StrictMode>,
   );

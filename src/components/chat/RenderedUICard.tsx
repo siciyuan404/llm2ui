@@ -1,21 +1,16 @@
 /**
  * RenderedUICard Component
- * 
- * Renders UI Schema directly in the chat interface with action buttons.
- * Provides fullscreen preview, copy JSON, and apply to editor functionality.
- * 
+ *
+ * Displays UI Schema in chat with a compact preview.
+ * No direct rendering in chat - only fullscreen preview, copy JSON, and apply to editor.
+ *
  * Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6, 7.7, 7.8, 7.10
  */
 
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { UIRenderer, defaultRegistry } from '@/lib';
 import type { EventHandler } from '@/lib';
 import type { UISchema, DataContext, EventAction } from '@/types';
@@ -32,23 +27,16 @@ export interface RenderedUICardProps {
   /** Callback when fullscreen preview is requested */
   onFullscreen?: () => void;
   /** Callback when copy JSON is clicked */
-  onCopyJson?: () => void;
+  onCopyJson?: (schema: UISchema) => void | Promise<void>;
   /** Callback when apply to editor is clicked */
-  onApplyToEditor?: () => void;
+  onApplyToEditor?: (schema: UISchema) => void | Promise<void>;
   /** Event handler for UI interactions */
   onEvent?: (componentId: string, event: string, payload: unknown) => void;
   /** Additional class name */
   className?: string;
 }
 
-export interface RenderedUICardState {
-  /** Whether fullscreen dialog is open */
-  isFullscreenOpen: boolean;
-  /** Render error if any */
-  renderError: string | null;
-  /** Whether JSON was copied */
-  copied: boolean;
-}
+
 
 // ============================================================================
 // Icons
@@ -134,21 +122,41 @@ function ApplyIcon({ className }: { className?: string }) {
   );
 }
 
-function AlertIcon({ className }: { className?: string }) {
+function UIIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
-      width="16"
-      height="16"
+      width="20"
+      height="20"
     >
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth={2}
-        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+        d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"
+      />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M6 18L18 6M6 6l12 12"
       />
     </svg>
   );
@@ -191,8 +199,8 @@ class RenderErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBound
 
 interface ActionButtonsProps {
   onFullscreen: () => void;
-  onCopyJson: () => void;
-  onApplyToEditor?: () => void;
+  onCopyJson: () => void | Promise<void>;
+  onApplyToEditor?: () => void | Promise<void>;
   copied: boolean;
 }
 
@@ -258,7 +266,19 @@ function ErrorDisplay({ error, schema }: ErrorDisplayProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 text-destructive text-sm">
-        <AlertIcon />
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+          />
+        </svg>
         <span>渲染失败: {error}</span>
       </div>
       <pre className="bg-muted/50 rounded-md p-3 overflow-x-auto text-xs font-mono max-h-48">
@@ -268,7 +288,55 @@ function ErrorDisplay({ error, schema }: ErrorDisplayProps) {
   );
 }
 
-interface FullscreenDialogProps {
+function SchemaPreview({ schema }: { schema: UISchema }) {
+  const componentType = schema.root?.type || 'Unknown';
+  const componentId = schema.root?.id || '未命名';
+  
+  const childCount = React.useMemo(() => {
+    if (schema.root?.children && Array.isArray(schema.root.children)) {
+      return schema.root.children.length;
+    }
+    return 0;
+  }, [schema.root]);
+
+  const propsCount = React.useMemo(() => {
+    let count = 0;
+    if (schema.root?.props) {
+      count += Object.keys(schema.root.props).length;
+    }
+    if (schema.root?.style) {
+      count += Object.keys(schema.root.style).length;
+    }
+    return count;
+  }, [schema.root]);
+
+  return (
+    <div className="flex items-center gap-4 py-4">
+      <div className="flex-shrink-0 w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+        <UIIcon className="text-primary" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="font-semibold text-sm text-foreground">
+            {componentType}
+          </span>
+          {schema.root?.id && (
+            <span className="text-xs text-muted-foreground">
+              #{componentId}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span>{childCount} 个子组件</span>
+          <span>•</span>
+          <span>{propsCount} 个属性</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface FullscreenPreviewProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   schema: UISchema;
@@ -276,13 +344,13 @@ interface FullscreenDialogProps {
   onEvent?: EventHandler;
 }
 
-function FullscreenDialog({
+function FullscreenPreview({
   open,
   onOpenChange,
   schema,
   data,
   onEvent,
-}: FullscreenDialogProps) {
+}: FullscreenPreviewProps) {
   const schemaWithData = React.useMemo(() => {
     if (data) {
       return { ...schema, data: { ...schema.data, ...data } };
@@ -290,29 +358,79 @@ function FullscreenDialog({
     return schema;
   }, [schema, data]);
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle>UI 预览</DialogTitle>
-        </DialogHeader>
-        <div className="p-4">
-          <RenderErrorBoundary
-            fallback={(err) => (
-              <ErrorDisplay error={err.message} schema={schema} />
-            )}
+  const [renderError, setRenderError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!open) {
+      setRenderError(null);
+    }
+  }, [open]);
+
+  const handleRenderError = React.useCallback((error: Error) => {
+    setRenderError(error.message);
+  }, []);
+
+  if (!open) return null;
+
+  const modalContent = (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onOpenChange(false);
+        }
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="fullscreen-preview-title"
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="relative w-[95vw] h-[95vh] max-w-[1600px] bg-background rounded-lg shadow-2xl flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b">
+          <div>
+            <h2
+              id="fullscreen-preview-title"
+              className="text-lg font-semibold"
+            >
+              UI 预览
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {schema.root?.type} {schema.root?.id && `#${schema.root.id}`}
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onOpenChange(false)}
+            title="关闭 (Esc)"
           >
-            <UIRenderer
-              schema={schemaWithData}
-              registry={defaultRegistry}
-              onEvent={onEvent}
-              showErrors
-            />
-          </RenderErrorBoundary>
+            <CloseIcon />
+          </Button>
         </div>
-      </DialogContent>
-    </Dialog>
+        <div className="flex-1 overflow-auto p-6">
+          {renderError ? (
+            <ErrorDisplay error={renderError} schema={schema} />
+          ) : (
+            <RenderErrorBoundary
+              fallback={(err) => {
+                handleRenderError(err);
+                return <ErrorDisplay error={err.message} schema={schema} />;
+              }}
+            >
+              <UIRenderer
+                schema={schemaWithData}
+                registry={defaultRegistry}
+                onEvent={onEvent}
+                showErrors
+              />
+            </RenderErrorBoundary>
+          )}
+        </div>
+      </div>
+    </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 // ============================================================================
@@ -320,14 +438,14 @@ function FullscreenDialog({
 // ============================================================================
 
 /**
- * RenderedUICard - Renders UI Schema in chat with action buttons
+ * RenderedUICard - Displays UI Schema in chat without direct rendering
  * 
  * Features:
- * - Renders UI Schema using the same renderer as preview panel
- * - Shows "AI 生成的 UI" label
- * - Provides fullscreen preview, copy JSON, apply to editor buttons
- * - Handles render errors gracefully with fallback to raw JSON
- * - Supports UI interactions (button clicks, input, etc.)
+ * - Shows compact preview of UI Schema (type, id, child count, prop count)
+ * - Provides fullscreen preview for full UI rendering
+ * - Copy JSON and apply to editor functionality
+ * - No direct rendering in chat - cleaner chat experience
+ * - Supports UI interactions in fullscreen mode
  */
 export function RenderedUICard({
   schema,
@@ -339,18 +457,8 @@ export function RenderedUICard({
   className,
 }: RenderedUICardProps) {
   const [isFullscreenOpen, setIsFullscreenOpen] = React.useState(false);
-  const [renderError, setRenderError] = React.useState<string | null>(null);
   const [copied, setCopied] = React.useState(false);
 
-  // Merge schema data with provided data
-  const schemaWithData = React.useMemo(() => {
-    if (data) {
-      return { ...schema, data: { ...schema.data, ...data } };
-    }
-    return schema;
-  }, [schema, data]);
-
-  // Handle event from rendered UI
   const handleEvent: EventHandler = React.useCallback(
     (action: EventAction, event: React.SyntheticEvent, componentId: string) => {
       if (onEvent) {
@@ -360,89 +468,64 @@ export function RenderedUICard({
     [onEvent]
   );
 
-  // Handle fullscreen click
   const handleFullscreen = React.useCallback(() => {
     setIsFullscreenOpen(true);
     onFullscreen?.();
   }, [onFullscreen]);
 
-  // Handle copy JSON click
   const handleCopyJson = React.useCallback(async () => {
     try {
       await navigator.clipboard.writeText(JSON.stringify(schema, null, 2));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-      onCopyJson?.();
+      await onCopyJson?.(schema);
     } catch (err) {
       console.error('Failed to copy JSON:', err);
     }
   }, [schema, onCopyJson]);
 
-  // Handle apply to editor click
-  const handleApplyToEditor = React.useCallback(() => {
-    onApplyToEditor?.();
-  }, [onApplyToEditor]);
-
-  // Handle render error
-  const handleRenderError = React.useCallback((error: Error) => {
-    setRenderError(error.message);
-  }, []);
+  const handleApplyToEditor = React.useCallback(async () => {
+    await onApplyToEditor?.(schema);
+  }, [schema, onApplyToEditor]);
 
   return (
-    <div
-      className={cn(
-        'rounded-lg border-2 border-primary/20 bg-primary/5',
-        'overflow-hidden',
-        className
-      )}
-      role="article"
-      aria-label="AI 生成的 UI"
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between px-3 py-2 bg-primary/10 border-b border-primary/20">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-primary">
-            ✨ AI 生成的 UI
-          </span>
-        </div>
-        <ActionButtons
-          onFullscreen={handleFullscreen}
-          onCopyJson={handleCopyJson}
-          onApplyToEditor={onApplyToEditor ? handleApplyToEditor : undefined}
-          copied={copied}
-        />
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {renderError ? (
-          <ErrorDisplay error={renderError} schema={schema} />
-        ) : (
-          <RenderErrorBoundary
-            fallback={(err) => {
-              handleRenderError(err);
-              return <ErrorDisplay error={err.message} schema={schema} />;
-            }}
-          >
-            <UIRenderer
-              schema={schemaWithData}
-              registry={defaultRegistry}
-              onEvent={handleEvent}
-              showErrors
-            />
-          </RenderErrorBoundary>
+    <>
+      <div
+        className={cn(
+          'rounded-lg border border-primary/20 bg-primary/5',
+          'overflow-hidden',
+          className
         )}
+        role="article"
+        aria-label="AI 生成的 UI"
+      >
+        <div className="flex items-center justify-between px-3 py-2 bg-primary/10 border-b border-primary/20">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium text-primary">
+              ✨ AI 生成的 UI
+            </span>
+          </div>
+          <ActionButtons
+            onFullscreen={handleFullscreen}
+            onCopyJson={handleCopyJson}
+            onApplyToEditor={onApplyToEditor ? handleApplyToEditor : undefined}
+            copied={copied}
+          />
+        </div>
+
+        <div className="p-4">
+          <SchemaPreview schema={schema} />
+        </div>
       </div>
 
-      {/* Fullscreen Dialog */}
-      <FullscreenDialog
+      <FullscreenPreview
         open={isFullscreenOpen}
         onOpenChange={setIsFullscreenOpen}
         schema={schema}
         data={data}
         onEvent={handleEvent}
       />
-    </div>
+    </>
   );
 }
 

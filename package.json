@@ -10,6 +10,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:renderer": "vite build --config packages/renderer/vite.config.ts",
+    "build:pages": "cross-env GITHUB_PAGES=true npm run build",
+    "deploy:test": "node scripts/deploy-test.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest --run",
@@ -62,6 +64,7 @@
     "zustand": "^5.0.9"
   },
   "devDependencies": {
+    "@babel/plugin-transform-react-jsx-source": "^7.27.1",
     "@eslint/js": "^9.39.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",

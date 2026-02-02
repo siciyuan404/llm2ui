@@ -62,14 +62,14 @@ const adminSidebarExample: ExampleMetadata = {
       id: 'sidebar-container',
       type: 'Container',
       props: {
-        className: 'w-64 h-screen bg-slate-900 text-white flex flex-col',
+        className: 'w-64 h-screen bg-slate-100 text-slate-900 flex flex-col border-r border-slate-200',
       },
       children: [
         {
           id: 'sidebar-header',
           type: 'Container',
           props: {
-            className: 'p-4 border-b border-slate-700',
+            className: 'p-4 border-b border-slate-200',
           },
           children: [
             {
@@ -94,7 +94,7 @@ const adminSidebarExample: ExampleMetadata = {
               type: 'Button',
               props: {
                 variant: 'ghost',
-                className: 'w-full justify-start text-white hover:bg-slate-800 gap-2',
+                className: 'w-full justify-start text-slate-700 hover:bg-slate-200 hover:text-slate-900 gap-2',
               },
               children: [
                 { id: 'dashboard-icon', type: 'Icon', props: { name: 'home', size: 16 } },
@@ -106,7 +106,7 @@ const adminSidebarExample: ExampleMetadata = {
               type: 'Button',
               props: {
                 variant: 'ghost',
-                className: 'w-full justify-start text-white hover:bg-slate-800 gap-2',
+                className: 'w-full justify-start text-slate-700 hover:bg-slate-200 hover:text-slate-900 gap-2',
               },
               children: [
                 { id: 'users-icon', type: 'Icon', props: { name: 'user', size: 16 } },
@@ -118,11 +118,130 @@ const adminSidebarExample: ExampleMetadata = {
               type: 'Button',
               props: {
                 variant: 'ghost',
-                className: 'w-full justify-start text-white hover:bg-slate-800 gap-2',
+                className: 'w-full justify-start text-slate-700 hover:bg-slate-200 hover:text-slate-900 gap-2',
               },
               children: [
                 { id: 'settings-icon', type: 'Icon', props: { name: 'settings', size: 16 } },
                 { id: 'settings-text', type: 'Text', text: '系统设置' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+/**
+ * AppSidebar 图标导航栏案例
+ * 类似 cherry-studio 风格的垂直图标导航栏
+ */
+const appSidebarExample: ExampleMetadata = {
+  id: 'system-navigation-app-sidebar',
+  title: 'AppSidebar 图标导航栏',
+  description: '垂直图标导航栏，类似 cherry-studio 风格，包含 Logo、主菜单和底部操作区',
+  category: 'navigation',
+  tags: ['sidebar', 'navigation', 'icon', 'app', 'cherry-studio'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'app-sidebar',
+      type: 'AppSidebar',
+      children: [
+        {
+          id: 'app-sidebar-logo',
+          type: 'AppSidebarLogo',
+          children: [
+            {
+              id: 'logo-icon',
+              type: 'Container',
+              props: {
+                className: 'w-8 h-8 bg-primary rounded-lg flex items-center justify-center',
+              },
+              children: [
+                {
+                  id: 'logo-text',
+                  type: 'Text',
+                  props: { className: 'text-primary-foreground font-bold text-sm' },
+                  text: 'A',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'app-sidebar-menus',
+          type: 'AppSidebarMenus',
+          children: [
+            {
+              id: 'menu-bot',
+              type: 'AppSidebarIconButton',
+              props: { active: true },
+              children: [
+                { id: 'bot-icon', type: 'Icon', props: { name: 'bot', size: 20 } },
+              ],
+            },
+            {
+              id: 'menu-globe',
+              type: 'AppSidebarIconButton',
+              children: [
+                { id: 'globe-icon', type: 'Icon', props: { name: 'globe', size: 20 } },
+              ],
+            },
+            {
+              id: 'menu-database',
+              type: 'AppSidebarIconButton',
+              children: [
+                { id: 'database-icon', type: 'Icon', props: { name: 'database', size: 20 } },
+              ],
+            },
+            {
+              id: 'menu-terminal',
+              type: 'AppSidebarIconButton',
+              children: [
+                { id: 'terminal-icon', type: 'Icon', props: { name: 'terminal', size: 20 } },
+              ],
+            },
+            {
+              id: 'menu-wrench',
+              type: 'AppSidebarIconButton',
+              children: [
+                { id: 'wrench-icon', type: 'Icon', props: { name: 'wrench', size: 20 } },
+              ],
+            },
+            {
+              id: 'menu-puzzle',
+              type: 'AppSidebarIconButton',
+              children: [
+                { id: 'puzzle-icon', type: 'Icon', props: { name: 'puzzle', size: 20 } },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'app-sidebar-bottom',
+          type: 'AppSidebarBottomMenus',
+          children: [
+            {
+              id: 'menu-activity',
+              type: 'AppSidebarIconButton',
+              children: [
+                { id: 'activity-icon', type: 'Icon', props: { name: 'activity', size: 20 } },
+              ],
+            },
+            {
+              id: 'menu-moon',
+              type: 'AppSidebarIconButton',
+              children: [
+                { id: 'moon-icon', type: 'Icon', props: { name: 'moon', size: 20 } },
+              ],
+            },
+            {
+              id: 'menu-settings',
+              type: 'AppSidebarIconButton',
+              children: [
+                { id: 'settings-icon', type: 'Icon', props: { name: 'settings', size: 20 } },
               ],
             },
           ],
@@ -389,45 +508,60 @@ const pcWebHeaderExample: ExampleMetadata = {
                       type: 'Button',
                       props: {
                         variant: 'ghost',
-                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 gap-2',
                       },
-                      text: '首页',
+                      children: [
+                        { id: 'nav-home-icon', type: 'Icon', props: { name: 'home', size: 16 } },
+                        { id: 'nav-home-text', type: 'Text', text: '首页' },
+                      ],
                     },
                     {
                       id: 'nav-products',
                       type: 'Button',
                       props: {
                         variant: 'ghost',
-                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 gap-2',
                       },
-                      text: '产品',
+                      children: [
+                        { id: 'nav-products-icon', type: 'Icon', props: { name: 'package', size: 16 } },
+                        { id: 'nav-products-text', type: 'Text', text: '产品' },
+                      ],
                     },
                     {
                       id: 'nav-solutions',
                       type: 'Button',
                       props: {
                         variant: 'ghost',
-                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 gap-2',
                       },
-                      text: '解决方案',
+                      children: [
+                        { id: 'nav-solutions-icon', type: 'Icon', props: { name: 'lightbulb', size: 16 } },
+                        { id: 'nav-solutions-text', type: 'Text', text: '解决方案' },
+                      ],
                     },
                     {
                       id: 'nav-pricing',
                       type: 'Button',
                       props: {
                         variant: 'ghost',
-                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 gap-2',
                       },
-                      text: '定价',
+                      children: [
+                        { id: 'nav-pricing-icon', type: 'Icon', props: { name: 'dollar-sign', size: 16 } },
+                        { id: 'nav-pricing-text', type: 'Text', text: '定价' },
+                      ],
                     },
                     {
                       id: 'nav-docs',
                       type: 'Button',
                       props: {
                         variant: 'ghost',
-                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100',
+                        className: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 gap-2',
                       },
-                      text: '文档',
+                      children: [
+                        { id: 'nav-docs-icon', type: 'Icon', props: { name: 'book', size: 16 } },
+                        { id: 'nav-docs-text', type: 'Text', text: '文档' },
+                      ],
                     },
                   ],
                 },
@@ -941,6 +1075,267 @@ const settingsFormExample: ExampleMetadata = {
   },
 };
 
+/**
+ * 可折叠设置面板案例
+ * 使用 SettingsPanel、SettingsSection 和各类表单控件组件
+ */
+const collapsibleSettingsPanelExample: ExampleMetadata = {
+  id: 'system-form-collapsible-settings',
+  title: '可折叠设置面板',
+  description: '使用可折叠分组的设置面板，包含开关、下拉选择、滑块等表单控件',
+  category: 'form',
+  tags: ['settings', 'collapsible', 'panel', 'switch', 'select', 'slider'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'settings-panel',
+      type: 'SettingsPanel',
+      props: {
+        title: '设置',
+        width: 320,
+      },
+      children: [
+        {
+          id: 'settings-sections',
+          type: 'SettingsSectionGroup',
+          children: [
+            // 消息设置分组
+            {
+              id: 'message-settings',
+              type: 'SettingsSection',
+              props: { title: '消息设置' },
+              children: [
+                {
+                  id: 'show-prompt',
+                  type: 'SwitchField',
+                  props: {
+                    label: '显示提示词',
+                    defaultChecked: true,
+                  },
+                },
+                {
+                  id: 'use-serif',
+                  type: 'SwitchField',
+                  props: {
+                    label: '使用衬线字体',
+                    defaultChecked: false,
+                  },
+                },
+                {
+                  id: 'auto-fold-thinking',
+                  type: 'SwitchField',
+                  props: {
+                    label: '思考内容自动折叠',
+                    helpText: 'AI 的思考过程会自动折叠，点击可展开查看',
+                    defaultChecked: true,
+                  },
+                },
+                {
+                  id: 'message-style',
+                  type: 'SelectField',
+                  props: {
+                    label: '消息样式',
+                    options: [
+                      { value: 'simple', label: '简洁' },
+                      { value: 'bubble', label: '气泡' },
+                    ],
+                    defaultValue: 'simple',
+                  },
+                },
+                {
+                  id: 'font-size',
+                  type: 'SliderField',
+                  props: {
+                    label: '消息字体大小',
+                    defaultValue: [14],
+                    min: 12,
+                    max: 24,
+                    step: 1,
+                    showValue: true,
+                    showRangeLabels: true,
+                    minLabel: 'A',
+                    maxLabel: 'A',
+                    centerLabel: '默认',
+                  },
+                },
+              ],
+            },
+            // 数学公式设置分组
+            {
+              id: 'math-settings',
+              type: 'SettingsSection',
+              props: { title: '数学公式设置' },
+              children: [
+                {
+                  id: 'math-engine',
+                  type: 'SelectField',
+                  props: {
+                    label: '数学公式引擎',
+                    options: [
+                      { value: 'katex', label: 'KaTeX' },
+                      { value: 'mathjax', label: 'MathJax' },
+                    ],
+                    defaultValue: 'katex',
+                  },
+                },
+                {
+                  id: 'enable-dollar',
+                  type: 'SwitchField',
+                  props: {
+                    label: '启用 $...$',
+                    helpText: '使用单个美元符号包裹行内公式',
+                    defaultChecked: true,
+                  },
+                },
+              ],
+            },
+            // 代码块设置分组
+            {
+              id: 'code-settings',
+              type: 'SettingsSection',
+              props: { title: '代码块设置' },
+              children: [
+                {
+                  id: 'code-style',
+                  type: 'SelectField',
+                  props: {
+                    label: '代码风格',
+                    options: [
+                      { value: 'auto', label: 'auto' },
+                      { value: 'dark', label: 'dark' },
+                      { value: 'light', label: 'light' },
+                    ],
+                    defaultValue: 'auto',
+                  },
+                },
+                {
+                  id: 'fancy-code',
+                  type: 'SwitchField',
+                  props: {
+                    label: '花式代码块',
+                    helpText: '使用更美观的代码块样式',
+                    defaultChecked: true,
+                  },
+                },
+                {
+                  id: 'code-execution',
+                  type: 'SwitchField',
+                  props: {
+                    label: '代码执行',
+                    helpText: '允许在沙箱中执行代码',
+                    defaultChecked: false,
+                  },
+                },
+                {
+                  id: 'show-line-numbers',
+                  type: 'SwitchField',
+                  props: {
+                    label: '代码显示行号',
+                    defaultChecked: false,
+                  },
+                },
+                {
+                  id: 'code-collapsible',
+                  type: 'SwitchField',
+                  props: {
+                    label: '代码块可折叠',
+                    defaultChecked: false,
+                  },
+                },
+              ],
+            },
+            // 输入设置分组
+            {
+              id: 'input-settings',
+              type: 'SettingsSection',
+              props: { title: '输入设置' },
+              children: [
+                {
+                  id: 'show-token-count',
+                  type: 'SwitchField',
+                  props: {
+                    label: '显示预估 Token 数',
+                    defaultChecked: false,
+                  },
+                },
+                {
+                  id: 'paste-as-file',
+                  type: 'SwitchField',
+                  props: {
+                    label: '长文本粘贴为文件',
+                    defaultChecked: false,
+                  },
+                },
+                {
+                  id: 'markdown-input',
+                  type: 'SwitchField',
+                  props: {
+                    label: 'Markdown 渲染输入消息',
+                    defaultChecked: false,
+                  },
+                },
+              ],
+            },
+            // 高级设置分组（默认折叠）
+            {
+              id: 'advanced-settings',
+              type: 'SettingsSection',
+              props: { title: '高级设置', defaultOpen: false },
+              children: [
+                {
+                  id: 'api-endpoint',
+                  type: 'InputField',
+                  props: {
+                    label: 'API 端点',
+                    placeholder: 'https://api.example.com',
+                    inputWidth: '160px',
+                  },
+                },
+                {
+                  id: 'timeout',
+                  type: 'InputField',
+                  props: {
+                    label: '超时时间',
+                    type: 'number',
+                    defaultValue: '30',
+                    helpText: '请求超时时间（秒）',
+                    inputWidth: '80px',
+                  },
+                },
+                {
+                  id: 'temperature',
+                  type: 'SliderField',
+                  props: {
+                    label: '温度参数',
+                    defaultValue: [0.7],
+                    min: 0,
+                    max: 2,
+                    step: 0.1,
+                    showValue: true,
+                  },
+                },
+                {
+                  id: 'max-tokens',
+                  type: 'SliderField',
+                  props: {
+                    label: '最大 Token 数',
+                    defaultValue: [2048],
+                    min: 256,
+                    max: 8192,
+                    step: 256,
+                    showValue: true,
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
 
 // ============================================================================
 // Navigation 类别案例
@@ -968,8 +1363,11 @@ const breadcrumbNavExample: ExampleMetadata = {
         {
           id: 'breadcrumb-home',
           type: 'Button',
-          props: { variant: 'link', className: 'p-0 h-auto' },
-          text: '首页',
+          props: { variant: 'link', className: 'p-0 h-auto gap-1' },
+          children: [
+            { id: 'breadcrumb-home-icon', type: 'Icon', props: { name: 'home', size: 14 } },
+            { id: 'breadcrumb-home-text', type: 'Text', text: '首页' },
+          ],
         },
         {
           id: 'breadcrumb-sep-1',
@@ -1029,36 +1427,48 @@ const tabsNavExample: ExampleMetadata = {
               type: 'Button',
               props: {
                 variant: 'ghost',
-                className: 'rounded-none border-b-2 border-primary px-4 py-2',
+                className: 'rounded-none border-b-2 border-primary px-4 py-2 gap-2',
               },
-              text: '概览',
+              children: [
+                { id: 'tab-1-icon', type: 'Icon', props: { name: 'layout-dashboard', size: 16 } },
+                { id: 'tab-1-text', type: 'Text', text: '概览' },
+              ],
             },
             {
               id: 'tab-2',
               type: 'Button',
               props: {
                 variant: 'ghost',
-                className: 'rounded-none border-b-2 border-transparent px-4 py-2',
+                className: 'rounded-none border-b-2 border-transparent px-4 py-2 gap-2',
               },
-              text: '分析',
+              children: [
+                { id: 'tab-2-icon', type: 'Icon', props: { name: 'bar-chart', size: 16 } },
+                { id: 'tab-2-text', type: 'Text', text: '分析' },
+              ],
             },
             {
               id: 'tab-3',
               type: 'Button',
               props: {
                 variant: 'ghost',
-                className: 'rounded-none border-b-2 border-transparent px-4 py-2',
+                className: 'rounded-none border-b-2 border-transparent px-4 py-2 gap-2',
               },
-              text: '报告',
+              children: [
+                { id: 'tab-3-icon', type: 'Icon', props: { name: 'file-text', size: 16 } },
+                { id: 'tab-3-text', type: 'Text', text: '报告' },
+              ],
             },
             {
               id: 'tab-4',
               type: 'Button',
               props: {
                 variant: 'ghost',
-                className: 'rounded-none border-b-2 border-transparent px-4 py-2',
+                className: 'rounded-none border-b-2 border-transparent px-4 py-2 gap-2',
               },
-              text: '设置',
+              children: [
+                { id: 'tab-4-icon', type: 'Icon', props: { name: 'settings', size: 16 } },
+                { id: 'tab-4-text', type: 'Text', text: '设置' },
+              ],
             },
           ],
         },
@@ -1539,6 +1949,159 @@ const listPageExample: ExampleMetadata = {
 // ============================================================================
 
 /**
+ * 产品展示卡片案例
+ */
+const productCardExample: ExampleMetadata = {
+  id: 'system-display-product-card',
+  title: '产品展示卡片',
+  description: '展示产品图片、标题、价格和购买按钮的产品卡片',
+  category: 'display',
+  tags: ['card', 'product', 'ecommerce'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'product-card',
+      type: 'Card',
+      props: { className: 'w-full max-w-sm' },
+      children: [
+        {
+          id: 'product-image',
+          type: 'Container',
+          props: { className: 'aspect-video bg-muted rounded-t-lg flex items-center justify-center' },
+          children: [
+            { id: 'image-placeholder', type: 'Text', props: { className: 'text-muted-foreground' }, text: '产品图片' },
+          ],
+        },
+        {
+          id: 'product-content',
+          type: 'CardContent',
+          props: { className: 'p-4' },
+          children: [
+            {
+              id: 'product-category',
+              type: 'Badge',
+              props: { className: 'w-fit mb-2' },
+              text: '新品',
+            },
+            {
+              id: 'product-title',
+              type: 'Text',
+              props: { className: 'font-semibold text-lg' },
+              text: '高级无线耳机',
+            },
+            {
+              id: 'product-description',
+              type: 'Text',
+              props: { className: 'text-sm text-muted-foreground mt-2' },
+              text: '降噪、超长续航、舒适佩戴',
+            },
+            {
+              id: 'product-price',
+              type: 'Container',
+              props: { className: 'flex items-center gap-2 mt-4' },
+              children: [
+                { id: 'price-current', type: 'Text', props: { className: 'text-2xl font-bold' }, text: '¥299' },
+                { id: 'price-original', type: 'Text', props: { className: 'text-sm text-muted-foreground line-through' }, text: '¥399' },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'product-footer',
+          type: 'CardFooter',
+          props: { className: 'gap-2' },
+          children: [
+            { id: 'btn-cart', type: 'Button', props: { variant: 'outline', className: 'flex-1 gap-2' }, children: [
+              { id: 'btn-cart-icon', type: 'Icon', props: { name: 'shopping-cart', size: 16 } },
+              { id: 'btn-cart-text', type: 'Text', text: '加入购物车' },
+            ] },
+            { id: 'btn-buy', type: 'Button', props: { className: 'flex-1 gap-2' }, children: [
+              { id: 'btn-buy-icon', type: 'Icon', props: { name: 'heart', size: 16 } },
+              { id: 'btn-buy-text', type: 'Text', text: '立即购买' },
+            ] },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+/**
+ * 图片画廊案例
+ */
+const imageGalleryExample: ExampleMetadata = {
+  id: 'system-display-image-gallery',
+  title: '图片画廊',
+  description: '网格布局的图片展示画廊',
+  category: 'display',
+  tags: ['gallery', 'image', 'grid'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'gallery-container',
+      type: 'Container',
+      props: { className: 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' },
+      children: [
+        {
+          id: 'gallery-item-1',
+          type: 'Card',
+          props: { className: 'overflow-hidden' },
+          children: [
+            {
+              id: 'gallery-image-1',
+              type: 'Container',
+              props: { className: 'aspect-square bg-muted' },
+              children: [{ id: 'gallery-text-1', type: 'Text', props: { className: 'flex items-center justify-center h-full text-muted-foreground' }, text: '图片 1' }],
+            },
+          ],
+        },
+        {
+          id: 'gallery-item-2',
+          type: 'Card',
+          props: { className: 'overflow-hidden' },
+          children: [
+            {
+              id: 'gallery-image-2',
+              type: 'Container',
+              props: { className: 'aspect-square bg-muted' },
+              children: [{ id: 'gallery-text-2', type: 'Text', props: { className: 'flex items-center justify-center h-full text-muted-foreground' }, text: '图片 2' }],
+            },
+          ],
+        },
+        {
+          id: 'gallery-item-3',
+          type: 'Card',
+          props: { className: 'overflow-hidden' },
+          children: [
+            {
+              id: 'gallery-image-3',
+              type: 'Container',
+              props: { className: 'aspect-square bg-muted' },
+              children: [{ id: 'gallery-text-3', type: 'Text', props: { className: 'flex items-center justify-center h-full text-muted-foreground' }, text: '图片 3' }],
+            },
+          ],
+        },
+        {
+          id: 'gallery-item-4',
+          type: 'Card',
+          props: { className: 'overflow-hidden' },
+          children: [
+            {
+              id: 'gallery-image-4',
+              type: 'Container',
+              props: { className: 'aspect-square bg-muted' },
+              children: [{ id: 'gallery-text-4', type: 'Text', props: { className: 'flex items-center justify-center h-full text-muted-foreground' }, text: '图片 4' }],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+/**
  * 用户资料卡片案例
  */
 const userProfileCardExample: ExampleMetadata = {
@@ -1626,8 +2189,24 @@ const userProfileCardExample: ExampleMetadata = {
           type: 'CardFooter',
           props: { className: 'flex gap-2' },
           children: [
-            { id: 'follow-btn', type: 'Button', props: { className: 'flex-1' }, text: '关注' },
-            { id: 'message-btn', type: 'Button', props: { variant: 'outline', className: 'flex-1' }, text: '私信' },
+            {
+              id: 'follow-btn',
+              type: 'Button',
+              props: { className: 'flex-1 gap-2' },
+              children: [
+                { id: 'follow-icon', type: 'Icon', props: { name: 'heart', size: 16 } },
+                { id: 'follow-text', type: 'Text', text: '关注' },
+              ],
+            },
+            {
+              id: 'message-btn',
+              type: 'Button',
+              props: { variant: 'outline', className: 'flex-1 gap-2' },
+              children: [
+                { id: 'message-icon', type: 'Icon', props: { name: 'message-circle', size: 16 } },
+                { id: 'message-text', type: 'Text', text: '私信' },
+              ],
+            },
           ],
         },
       ],
@@ -1815,6 +2394,374 @@ const emptyStateExample: ExampleMetadata = {
   },
 };
 
+/**
+ * 成功提示案例
+ */
+const successAlertExample: ExampleMetadata = {
+  id: 'system-feedback-success-alert',
+  title: '成功提示',
+  description: '操作成功的提示信息',
+  category: 'feedback',
+  tags: ['alert', 'success', 'notification'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'success-alert',
+      type: 'Alert',
+      props: { className: 'border-green-200 bg-green-50' },
+      children: [
+        { id: 'success-icon', type: 'Icon', props: { name: 'check-circle', size: 20, className: 'text-green-600' } },
+        { id: 'success-title', type: 'Text', props: { className: 'font-medium text-green-800' }, text: '操作成功' },
+        { id: 'success-desc', type: 'Text', props: { className: 'text-green-700' }, text: '您的更改已成功保存' },
+      ],
+    },
+  },
+};
+
+/**
+ * 错误提示案例
+ */
+const errorAlertExample: ExampleMetadata = {
+  id: 'system-feedback-error-alert',
+  title: '错误提示',
+  description: '操作失败的错误提示信息',
+  category: 'feedback',
+  tags: ['alert', 'error', 'notification'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'error-alert',
+      type: 'Alert',
+      props: { variant: 'destructive' },
+      children: [
+        { id: 'error-icon', type: 'Icon', props: { name: 'alert-circle', size: 20 } },
+        { id: 'error-title', type: 'Text', props: { className: 'font-medium' }, text: '操作失败' },
+        { id: 'error-desc', type: 'Text', text: '保存时发生错误，请稍后重试' },
+      ],
+    },
+  },
+};
+
+/**
+ * 确认对话框案例
+ */
+const confirmDialogExample: ExampleMetadata = {
+  id: 'system-feedback-confirm-dialog',
+  title: '确认对话框',
+  description: '需要用户确认的对话框',
+  category: 'feedback',
+  tags: ['dialog', 'confirm', 'modal'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'confirm-dialog',
+      type: 'AlertDialog',
+      props: { open: true },
+      children: [
+        {
+          id: 'confirm-content',
+          type: 'AlertDialogContent',
+          children: [
+            {
+              id: 'confirm-header',
+              type: 'AlertDialogHeader',
+              children: [
+                { id: 'confirm-title', type: 'AlertDialogTitle', text: '确认删除' },
+                { id: 'confirm-desc', type: 'AlertDialogDescription', text: '此操作无法撤销，确定要删除吗？' },
+              ],
+            },
+            {
+              id: 'confirm-footer',
+              type: 'AlertDialogFooter',
+              children: [
+                { id: 'btn-cancel', type: 'AlertDialogCancel', props: { className: 'gap-2' }, children: [
+                  { id: 'btn-cancel-icon', type: 'Icon', props: { name: 'x', size: 16 } },
+                  { id: 'btn-cancel-text', type: 'Text', text: '取消' },
+                ] },
+                { id: 'btn-confirm', type: 'AlertDialogAction', props: { className: 'bg-destructive gap-2' }, children: [
+                  { id: 'btn-confirm-icon', type: 'Icon', props: { name: 'trash', size: 16 } },
+                  { id: 'btn-confirm-text', type: 'Text', text: '删除' },
+                ] },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+/**
+ * Toast 通知案例
+ */
+const toastNotificationExample: ExampleMetadata = {
+  id: 'system-feedback-toast-notification',
+  title: 'Toast 通知',
+  description: '右上角弹出的通知消息',
+  category: 'feedback',
+  tags: ['toast', 'notification', 'message'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'toast-container',
+      type: 'Container',
+      props: { className: 'fixed top-4 right-4 z-50 space-y-2' },
+      children: [
+        {
+          id: 'toast-item',
+          type: 'Card',
+          props: { className: 'w-80 p-4 shadow-lg border-l-4 border-l-green-500' },
+          children: [
+            {
+              id: 'toast-header',
+              type: 'Container',
+              props: { className: 'flex items-start gap-3' },
+              children: [
+                { id: 'toast-icon', type: 'Icon', props: { name: 'check-circle', size: 20, className: 'text-green-500' } },
+                {
+                  id: 'toast-content',
+                  type: 'Container',
+                  props: { className: 'flex-1' },
+                  children: [
+                    { id: 'toast-title', type: 'Text', props: { className: 'font-medium' }, text: '成功' },
+                    { id: 'toast-desc', type: 'Text', props: { className: 'text-sm text-muted-foreground' }, text: '操作已完成' },
+                  ],
+                },
+                { id: 'toast-close', type: 'Icon', props: { name: 'x', size: 16, className: 'text-muted-foreground cursor-pointer' } },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
+/**
+ * Agent 聊天页面案例
+ * 
+ * 来自 ProxyCast 项目的 AgentChatPage 组件
+ * 包含聊天界面、输入框、消息列表等功能
+ */
+const agentChatPageExample: ExampleMetadata = {
+  id: 'system-layout-agent-chat-page',
+  title: 'Agent 聊天页面',
+  description: 'AI Agent 聊天界面，包含消息列表、输入框、工具栏等功能',
+  category: 'layout',
+  tags: ['chat', 'agent', 'sidebar', 'input', 'message'],
+  source: 'system',
+  schema: {
+    version: '1.0',
+    root: {
+      id: 'chat-page',
+      type: 'Container',
+      props: { className: 'flex h-screen w-full bg-background' },
+      children: [
+        // 侧边栏
+        {
+          id: 'sidebar',
+          type: 'Container',
+          props: { className: 'w-64 border-r border-border bg-card flex flex-col' },
+          children: [
+            {
+              id: 'sidebar-header',
+              type: 'Container',
+              props: { className: 'p-4 border-b border-border' },
+              children: [
+                { id: 'logo-text', type: 'Text', props: { className: 'text-xl font-bold' }, text: 'Agent Chat' },
+              ],
+            },
+            {
+              id: 'sidebar-content',
+              type: 'Container',
+              props: { className: 'flex-1 py-4 px-2' },
+              children: [
+                {
+                  id: 'new-chat-btn',
+                  type: 'Button',
+                  props: { className: 'w-full justify-start gap-2 mb-4' },
+                  children: [
+                    { id: 'new-chat-icon', type: 'Icon', props: { name: 'plus', size: 16 } },
+                    { id: 'new-chat-text', type: 'Text', text: '新建对话' },
+                  ],
+                },
+                {
+                  id: 'chat-list',
+                  type: 'Container',
+                  props: { className: 'space-y-1' },
+                  children: [
+                    {
+                      id: 'chat-item-1',
+                      type: 'Button',
+                      props: { className: 'w-full justify-start text-left px-3 py-2 rounded-md hover:bg-accent' },
+                      children: [
+                        { id: 'chat-title-1', type: 'Text', props: { className: 'text-sm' }, text: '对话 1' },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+        // 主内容区
+        {
+          id: 'main-content',
+          type: 'Container',
+          props: { className: 'flex-1 flex flex-col min-w-0' },
+          children: [
+            // 顶部导航栏
+            {
+              id: 'navbar',
+              type: 'Container',
+              props: { className: 'h-12 border-b border-border flex items-center justify-between px-4' },
+              children: [
+                {
+                  id: 'navbar-left',
+                  type: 'Container',
+                  props: { className: 'flex items-center gap-2' },
+                  children: [
+                    { id: 'toggle-sidebar-btn', type: 'Button', props: { variant: 'ghost', size: 'icon' }, children: [
+                      { id: 'toggle-sidebar-icon', type: 'Icon', props: { name: 'menu', size: 20 } },
+                    ]},
+                    { id: 'current-model', type: 'Text', props: { className: 'text-sm font-medium' }, text: 'GPT-4' },
+                  ],
+                },
+                {
+                  id: 'navbar-right',
+                  type: 'Container',
+                  props: { className: 'flex items-center gap-2' },
+                  children: [
+                    { id: 'settings-btn', type: 'Button', props: { variant: 'ghost', size: 'icon' }, children: [
+                      { id: 'settings-icon', type: 'Icon', props: { name: 'settings', size: 20 } },
+                    ]},
+                  ],
+                },
+              ],
+            },
+            // 消息列表区域
+            {
+              id: 'message-area',
+              type: 'Container',
+              props: { className: 'flex-1 overflow-auto' },
+              children: [
+                {
+                  id: 'message-list',
+                  type: 'Container',
+                  props: { className: 'max-w-3xl mx-auto py-8 space-y-6' },
+                  children: [
+                    {
+                      id: 'user-message',
+                      type: 'Container',
+                      props: { className: 'flex gap-4' },
+                      children: [
+                        { id: 'user-avatar', type: 'Avatar', props: { className: 'w-8 h-8' }, children: [
+                          { id: 'user-avatar-icon', type: 'Icon', props: { name: 'user', size: 20 } },
+                        ]},
+                        {
+                          id: 'user-message-content',
+                          type: 'Container',
+                          props: { className: 'flex-1' },
+                          children: [
+                            { id: 'user-message-text', type: 'Text', props: { className: 'text-sm' }, text: '你好，请帮我分析一下这个问题' },
+                          ],
+                        },
+                      ],
+                    },
+                    {
+                      id: 'assistant-message',
+                      type: 'Container',
+                      props: { className: 'flex gap-4' },
+                      children: [
+                        { id: 'assistant-avatar', type: 'Avatar', props: { className: 'w-8 h-8 bg-primary' }, children: [
+                          { id: 'assistant-avatar-icon', type: 'Icon', props: { name: 'bot', size: 20, className: 'text-primary-foreground' } },
+                        ]},
+                        {
+                          id: 'assistant-message-content',
+                          type: 'Container',
+                          props: { className: 'flex-1' },
+                          children: [
+                            { id: 'assistant-message-text', type: 'Text', props: { className: 'text-sm' }, text: '好的，我来帮你分析这个问题...' },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+            // 输入区域
+            {
+              id: 'input-area',
+              type: 'Container',
+              props: { className: 'p-4 border-t border-border' },
+              children: [
+                {
+                  id: 'input-container',
+                  type: 'Container',
+                  props: { className: 'max-w-3xl mx-auto' },
+                  children: [
+                    {
+                      id: 'input-wrapper',
+                      type: 'Container',
+                      props: { className: 'border border-border rounded-2xl bg-zinc-100 dark:bg-zinc-800' },
+                      children: [
+                        {
+                          id: 'input-textarea',
+                          type: 'Textarea',
+                          props: { 
+                            className: 'w-full px-4 py-2 bg-transparent border-none resize-none min-h-[40px]',
+                            placeholder: '在这里输入消息... 按 Enter 发送'
+                          },
+                        },
+                        {
+                          id: 'input-toolbar',
+                          type: 'Container',
+                          props: { className: 'flex items-center justify-between px-2 pb-2' },
+                          children: [
+                            {
+                              id: 'input-tools',
+                              type: 'Container',
+                              props: { className: 'flex items-center gap-1' },
+                              children: [
+                                { id: 'attach-btn', type: 'Button', props: { variant: 'ghost', size: 'icon', className: 'w-8 h-8' }, children: [
+                                  { id: 'attach-icon', type: 'Icon', props: { name: 'paperclip', size: 16 } },
+                                ]},
+                                { id: 'thinking-btn', type: 'Button', props: { variant: 'ghost', size: 'icon', className: 'w-8 h-8' }, children: [
+                                  { id: 'thinking-icon', type: 'Icon', props: { name: 'lightbulb', size: 16 } },
+                                ]},
+                                { id: 'search-btn', type: 'Button', props: { variant: 'ghost', size: 'icon', className: 'w-8 h-8' }, children: [
+                                  { id: 'search-icon', type: 'Icon', props: { name: 'globe', size: 16 } },
+                                ]},
+                              ],
+                            },
+                            {
+                              id: 'send-btn',
+                              type: 'Button',
+                              props: { className: 'w-8 h-8 rounded-full bg-primary text-primary-foreground' },
+                              children: [
+                                { id: 'send-icon', type: 'Icon', props: { name: 'arrow-up', size: 20 } },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  },
+};
+
 
 // ============================================================================
 // 导出
@@ -1833,15 +2780,18 @@ export const PRESET_EXAMPLES: ExampleMetadata[] = [
   pcWebHeaderExample,
   threeColumnLayoutExample,
   responsiveContainerExample,
+  agentChatPageExample,
+  // Navigation 类别
+  appSidebarExample,
+  breadcrumbNavExample,
+  tabsNavExample,
+  stepsNavExample,
   // Form 类别
   loginFormExample,
   registerFormExample,
   searchFormExample,
   settingsFormExample,
-  // Navigation 类别
-  breadcrumbNavExample,
-  tabsNavExample,
-  stepsNavExample,
+  collapsibleSettingsPanelExample,
   // Dashboard 类别
   dataCardsExample,
   statsPanelExample,
@@ -1849,9 +2799,15 @@ export const PRESET_EXAMPLES: ExampleMetadata[] = [
   // Display 类别
   userProfileCardExample,
   notificationListExample,
+  productCardExample,
+  imageGalleryExample,
   // Feedback 类别
   loadingStateExample,
   emptyStateExample,
+  successAlertExample,
+  errorAlertExample,
+  confirmDialogExample,
+  toastNotificationExample,
 ];
 
 /**

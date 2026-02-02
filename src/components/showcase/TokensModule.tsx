@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
+import { cn, copyToClipboard } from '@/lib/utils';
 import {
   Palette,
   Type,
@@ -117,31 +117,6 @@ const COLOR_GROUP_LABELS: Record<keyof ColorTokens, string> = {
 // ============================================================================
 // Helper Functions
 // ============================================================================
-
-/**
- * 复制文本到剪贴板
- */
-async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-      return true;
-    } catch {
-      return false;
-    } finally {
-      document.body.removeChild(textarea);
-    }
-  }
-}
 
 /**
  * 将 hex 颜色转换为 RGB

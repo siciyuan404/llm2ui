@@ -9,6 +9,27 @@ import type { UISchema, DataContext } from './ui-schema';
 import type { LLMConfig } from './llm.types';
 
 // ============================================================================
+// 开发者模式类型
+// ============================================================================
+
+/**
+ * 开发者模式状态
+ */
+export type DevModeStatus = 'on' | 'off';
+
+/**
+ * 组件调试信息
+ */
+export interface ComponentDebugInfo {
+  /** 组件名称 */
+  componentName: string;
+  /** 代码文件路径 */
+  filePath: string;
+  /** 行号 */
+  lineNumber?: number;
+}
+
+// ============================================================================
 // 主题状态类型
 // ============================================================================
 
@@ -249,6 +270,10 @@ export interface AppState {
   themePreferences: ThemePreferences;
   /** LLM 上下文设置 */
   contextSettings: PersistedContextSettings;
+  
+  // 开发者模式状态
+  /** 开发者模式开关 */
+  devMode: DevModeStatus;
 }
 
 /**
@@ -277,4 +302,8 @@ export interface AppActions {
   // 主题操作
   setThemePreferences: (preferences: Partial<ThemePreferences>) => void;
   setContextSettings: (settings: Partial<PersistedContextSettings>) => void;
+  
+  // 开发者模式操作
+  setDevMode: (mode: DevModeStatus) => void;
+  toggleDevMode: () => void;
 }

@@ -14,7 +14,7 @@
  */
 
 import * as React from 'react';
-import { cn } from '@/lib/utils';
+import { cn, copyToClipboard } from '@/lib/utils';
 import type { ComponentDefinition, ComponentExample, ComponentRegistry } from '@/lib';
 import { defaultRegistry } from '@/lib';
 import type { UISchema } from '@/types';
@@ -105,35 +105,6 @@ type CopyState = 'idle' | 'copied' | 'error';
  */
 function formatSchema(schema: UISchema): string {
   return JSON.stringify(schema, null, 2);
-}
-
-/**
- * Copy text to clipboard
- * @param text - The text to copy to clipboard
- * @returns Promise<boolean> - true if copy succeeded, false otherwise
- */
-export async function copyToClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    // Fallback for older browsers
-    try {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      const result = document.execCommand('copy');
-      document.body.removeChild(textArea);
-      return result;
-    } catch {
-      return false;
-    }
-  }
 }
 
 /**
@@ -1252,3 +1223,6 @@ export function ExamplesTab({
 }
 
 export default ExamplesTab;
+
+
+export { copyToClipboard } from '@/lib/utils';
